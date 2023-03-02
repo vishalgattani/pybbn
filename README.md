@@ -1,10 +1,16 @@
+# Bayesian Belief Networks and Experimental Design
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vishalgattani/pybbn/HEAD?urlpath=https%3A%2F%2Fgithub.com%2Fvishalgattani%2Fpybbn%2Fblob%2Fmain%2Fassurance-cases%2Froc.ipynb)
+
+
+
 ![pybbn logo](https://py-bbn.readthedocs.io/_images/logo-250.png)
 
 # PyBBN
 
 PyBBN is Python library for Bayesian Belief Networks (BBNs) exact inference using the [junction tree algorithm](https://en.wikipedia.org/wiki/Junction_tree_algorithm) or Probability Propagation in Trees of Clusters (PPTC). The implementation is taken directly from [C. Huang and A. Darwiche, "Inference in
 Belief Networks: A Procedural Guide," in International Journal of Approximate Reasoning, vol. 15,
-pp. 225--263, 1999](http://pages.cs.wisc.edu/~dpage/ijar95.pdf). In this API, PPTC is applied to BBNs with all discrete variables. When dealing with a BBN with all Gaussian variables (or a Gaussian Belief Network, GBN), exact inference is conducted through an incremental algorithm manipulating the means and covariance matrix. Additionally, there is the ability to generate singly- and multi-connected graphs, which is taken from [JS Ide and FG Cozman, 
+pp. 225--263, 1999](http://pages.cs.wisc.edu/~dpage/ijar95.pdf). In this API, PPTC is applied to BBNs with all discrete variables. When dealing with a BBN with all Gaussian variables (or a Gaussian Belief Network, GBN), exact inference is conducted through an incremental algorithm manipulating the means and covariance matrix. Additionally, there is the ability to generate singly- and multi-connected graphs, which is taken from [JS Ide and FG Cozman,
 "Random Generation of Bayesian Network," in Advances in Artificial Intelligence, Lecture Notes in Computer Science, vol 2507](https://pdfs.semanticscholar.org/5273/2fb57129443592024b0e7e46c2a1ec36639c.pdf). There is also the option to generate sample data from your BBN. This synthetic data may be summarized to generate your posterior marginal probabilities and work as a form of approximate inference. Lastly, we have added Pearl's `do-operator` for causal inference.
 
 # Power Up, Next Level
@@ -198,7 +204,7 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 
 # Other Python Bayesian Belief Network Inference Libraries
 
-Here is a list of other Python libraries for inference in Bayesian Belief Networks. 
+Here is a list of other Python libraries for inference in Bayesian Belief Networks.
 
 | Library | Algorithm | Algorithm Type | License |
 | -------:| ---------:| -------------: | -------:|
@@ -224,12 +230,12 @@ This Python code base is a port of the [original Java code](https://github.com/v
 # Citation
 
 ```
-@misc{vang_2017, 
-title={PyBBN}, 
-url={https://github.com/vangj/py-bbn/}, 
+@misc{vang_2017,
+title={PyBBN},
+url={https://github.com/vangj/py-bbn/},
 journal={GitHub},
-author={Vang, Jee}, 
-year={2017}, 
+author={Vang, Jee},
+year={2017},
 month={Jan}}
 ```
 

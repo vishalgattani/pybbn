@@ -15,7 +15,6 @@ matplotlib
 pygraphviz
 ipykernel
 pygraphviz
-python==3.7
 plotly
 chart-studio
 scikit-learn

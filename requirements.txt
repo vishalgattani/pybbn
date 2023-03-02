@@ -84,6 +84,7 @@ pycparser==2.21
 pyee==8.2.2
 pyflakes==2.4.0
 Pygments==2.11.2
+pygraphviz ==1.7
 pyOpenSSL==22.0.0
 pyparsing==3.0.9
 PyPDF2==3.0.1

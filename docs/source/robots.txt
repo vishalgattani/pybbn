@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://py-bbn.readthedocs.io/sitemap.xml

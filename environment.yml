@@ -128,7 +128,6 @@ dependencies:
 - plotly=5.9.0=py37hecd8cb5_0
 - prompt-toolkit=3.0.36=py37hecd8cb5_0
 - psutil=5.9.0=py37hca72f7f_0
-- ptyprocess=0.7.0=pyhd3eb1b0_2
 - pycodestyle=2.8.0=pyhd3eb1b0_0
 - pycparser=2.21=pyhd3eb1b0_0
 - pyflakes=2.4.0=pyhd3eb1b0_0

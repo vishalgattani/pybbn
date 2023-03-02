@@ -28,7 +28,6 @@ dependencies:
 - decorator=5.1.1=pyhd3eb1b0_0
 - defusedxml=0.7.1=pyhd3eb1b0_0
 - docutils=0.18.1=py37hecd8cb5_3
-- entrypoints=0.4=py37hecd8cb5_0
 - expat=2.4.9=he9d5cce_0
 - fftw=3.3.9=h9ed2024_1
 - flake8=4.0.1=pyhd3eb1b0_1

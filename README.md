@@ -216,12 +216,6 @@ Here is a list of other Python libraries for inference in Bayesian Belief Networ
 
 I found other [packages](https://pypi.python.org/pypi?%3Aaction=search&term=bayesian+network&submit=search) in PyPI too.
 
-# Java
-
-But I am coming from the Java mothership and I want to use Bayesian Belief Networks in Java. How do I perform probabilistic inference in Java?
-
-This Python code base is a port of the [original Java code](https://github.com/vangj/jbayes).
-
 # Help
 
 - [Documentation](https://py-bbn.readthedocs.io/)
@@ -240,7 +234,6 @@ month={Jan}}
 ```
 
 ## Online Articles
-I found these online articles using PyBBN.
 
 - [BBN: Bayesian Belief Networks — How to Build Them Effectively in Python](https://towardsdatascience.com/bbn-bayesian-belief-networks-how-to-build-them-effectively-in-python-6b7f93435bba)
 - [Introduction to Bayesian Belief Networks](https://towardsdatascience.com/introduction-to-bayesian-belief-networks-c012e3f59f1b)
@@ -265,11 +258,3 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-## Art Copyright
-
-Copyright 2020 Daytchia Vang
-
-# Sponsor, Love
-
-- [Patreon](https://www.patreon.com/vangj)
-- [GitHub](https://github.com/sponsors/vangj)

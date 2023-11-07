@@ -172,6 +172,7 @@ bbn.create_edge(mission_times_pose_within_threshold, mission_pose_in_threshold)
 bbn.create_edge(mission_pose_in_threshold, mission_success)
 
 bbn.set_join_tree()
+bbn.get_leaf_nodes()
 
 mission_df = bbn.print_probs_node(0)
 mission_df.p = mission_df.p.round(4)
@@ -186,7 +187,7 @@ collision_df = bbn.print_probs_node(3)
 collision_df.p = collision_df.p.round(4)
 
 ncollision_df = bbn.print_probs_node(4)
-ncollision_df.p = collision_df.p.round(4)
+ncollision_df.p = ncollision_df.p.round(4)
 
 pose_df = bbn.print_probs_node(5)
 pose_df.p = pose_df.p.round(4)

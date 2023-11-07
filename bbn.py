@@ -168,5 +168,30 @@ class BBN:
         return self.join_tree
 
     def get_children(self, node_id):
-        logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
+        # logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
         return self.bbn.get_children(node_id=node_id)
+
+    def get_parent(self, node_id):
+        # logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
+        return self.bbn.get_parents(node_id)
+
+    def get_leaf_nodes(self):
+        leaf_nodes = {}
+        for node_id, node_name in self.bbn.get_i2n().items():
+            logger.debug(
+                f"Children of {node_name}({node_id}):{self.get_children(node_id=node_id)}"
+            )
+            logger.debug(
+                f"Parent of {node_name}({node_id}):{self.get_parent(node_id=node_id)}"
+            )
+            if not self.get_parent(node_id):
+                leaf_nodes[node_id] = node_name
+        logger.debug(f"Leaf nodes: {leaf_nodes}")
+        return leaf_nodes
+
+    def get_node_identifiers(self):
+        logger.debug(f"{self.bbn.get_i2n()}")
+        return self.bbn.i2n()
+
+    def get_bbn_dataframe(self):
+        NotImplemented

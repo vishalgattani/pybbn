@@ -167,15 +167,36 @@ class BBN:
     def get_join_tree(self):
         return self.join_tree
 
-    def get_children(self, node_id):
+    def get_parent(self, node_id):
+        """Get parent nodes of a node: In BBN, directions are reversed.
+
+        Args:
+            node_id (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         # logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
         return self.bbn.get_children(node_id=node_id)
 
-    def get_parent(self, node_id):
-        # logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
-        return self.bbn.get_parents(node_id)
+    def get_children(self, node_id):
+        """Get children nodes of a node: In BBN, the directions are reversed.
+
+        Args:
+            node_id (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        # logger.debug(f"{self.bbn.get_parents(id=node_id)}")
+        return self.bbn.get_parents(id=node_id)
 
     def get_leaf_nodes(self):
+        """Leaf nodes are basically the parents as BBN reverses the direction.
+
+        Returns:
+            _type_: _description_
+        """
         leaf_nodes = {}
         for node_id, node_name in self.bbn.get_i2n().items():
             logger.debug(

@@ -1,19 +1,22 @@
 import os
 import pathlib
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 import numpy as np
-np.seterr(invalid='ignore')
+
+np.seterr(invalid="ignore")
 import pandas as pd
-pd.set_option('display.max_rows', None)
 
-import networkx as nx
+pd.set_option("display.max_rows", None)
+
 import matplotlib.pyplot as plt
+import networkx as nx
 from matplotlib.widgets import Slider
-
-from logger import logger
+from scipy.stats import binom
 
 import pybbn
+from logger import logger
 from pybbn.graph.dag import Bbn
 from pybbn.graph.edge import Edge, EdgeType
 from pybbn.graph.jointree import EvidenceBuilder
@@ -22,13 +25,13 @@ from pybbn.graph.variable import Variable
 from pybbn.pptc.inferencecontroller import InferenceController
 from pybbn.sampling.sampling import LogicSampler
 
-from scipy.stats import binom
 
-class BBN():
+class BBN:
     def __init__(self) -> None:
-        pass
+        self.bbn = Bbn()
+        self.join_tree = None
 
-    def getBinomProb(self,total_exp_runs,p):
+    def get_binomial_prob(self, total_exp_runs, p):
         """
         Given number of experiments to be performed and the prior probability of success, returns the list of probabilities of successes for k trials out of total n runs
 
@@ -39,9 +42,9 @@ class BBN():
         Returns:
         _type_: list of probabilities of success for k out of n runs
         """
-        return list(binom.pmf(list(range(total_exp_runs + 1)),total_exp_runs, p))
+        return list(binom.pmf(list(range(total_exp_runs + 1)), total_exp_runs, p))
 
-    def getCDFBinomProb(self,total_exp_runs,p):
+    def get_cdf_binomial_prob(self, total_exp_runs, p):
         """Given number of experiments to be performed and the prior probability of success, returns the list of cumulative probabilities of successes for k trials out of total n runs
 
         Args:
@@ -51,9 +54,9 @@ class BBN():
         Returns:
             _type_: list of cumulative probabilities of success up till k out of n runs
         """
-        return list(binom.cdf(list(range(total_exp_runs + 1)),total_exp_runs, p))
+        return list(binom.cdf(list(range(total_exp_runs + 1)), total_exp_runs, p))
 
-    def evidence(self,join_tree,ev, nod, cat, val):
+    def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
 
         Args:
@@ -63,34 +66,38 @@ class BBN():
             cat (_type_): Which state should the evidence be incorporated into (e.g: True or False state if node has 2 states true/false)
             val (_type_): Probability value of evidence (set to 1 as it is evidence)
         """
-        ev = EvidenceBuilder() \
-        .with_node(join_tree.get_bbn_node_by_name(nod)) \
-        .with_evidence(cat, val) \
-        .build()
-        join_tree.set_observation(ev)
+        ev = (
+            EvidenceBuilder()
+            .with_node(self.join_tree.get_bbn_node_by_name(nod))
+            .with_evidence(cat, val)
+            .build()
+        )
+        self.join_tree.set_observation(ev)
 
-    def resetEvidence(self,join_tree):
+    def reset_evidence(self):
         """Resets entrie evidence of the BBN to their predefined values
 
         Args:
             join_tree (_type_): clears evidence from BBN
         """
-        join_tree.unobserve_all()
+        logger.info(f"Resetting evidence...")
+        self.join_tree.unobserve_all()
 
-    def print_probs(self,join_tree):
+    def print_probs(self):
         """Printing Posterior Probabilities
 
         Args:
             join_tree (_type_): Prints out all posterior probabilities of all nodes in the BBN
         """
-        for node in join_tree.get_bbn_nodes():
-            potential = join_tree.get_bbn_potential(node)
-            print("Node:", node.to_dict())
-            print("Values:")
-            print(potential)
-            print('----------------')
+        if self.join_tree:
+            for node in self.join_tree.get_bbn_nodes():
+                potential = self.join_tree.get_bbn_potential(node)
+                logger.debug(f"Node: {node.to_dict()}")
+                logger.debug(f"Values: {potential}")
+        else:
+            logger.error(f"Join Tree has not been set!")
 
-    def print_probs_node(self,join_tree,id):
+    def print_probs_node(self, id):
         """Fetches posterior probabilities of particular node by using its ID
 
         Args:
@@ -100,16 +107,18 @@ class BBN():
         Returns:
             _type_: Pandas Dataframe
         """
-        for node in join_tree.get_bbn_nodes():
-            if (node.to_dict()['variable']['id']==id):
-                logger.debug(f"Node:{node.variable.name}")
-                potential = join_tree.get_bbn_potential(node)
-                df = self.potential_to_df(join_tree.get_bbn_potential(node))
-                # display(df)
-                logger.debug(f"{df}")
-                return df
+        if self.join_tree:
+            for node in self.join_tree.get_bbn_nodes():
+                if node.to_dict()["variable"]["id"] == id:
+                    logger.debug(f"Node:{node.variable.name}")
+                    potential = self.join_tree.get_bbn_potential(node)
+                    df = self.potential_to_df(self.join_tree.get_bbn_potential(node))
+                    logger.debug(f"{df}")
+                    return df
+        else:
+            logger.error(f"Join Tree has not been set!")
 
-    def potential_to_df(self,p):
+    def potential_to_df(self, p):
         """Dataframe of a node with its states and their probability values
 
         Args:
@@ -127,9 +136,9 @@ class BBN():
             p = pe.value
             t = (v, p)
             data.append(t)
-        return pd.DataFrame(data, columns=['val', 'p'])
+        return pd.DataFrame(data, columns=["val", "p"])
 
-    def potentials_to_dfs(self,join_tree):
+    def potentials_to_dfs(self):
         """Returns all nodes and their state values as a list of dataframes
 
         Args:
@@ -139,23 +148,46 @@ class BBN():
             _type_: Pandas Dataframe
         """
         data = []
-        for node in join_tree.get_bbn_nodes():
+        for node in self.join_tree.get_bbn_nodes():
             name = node.variable.name
-            df = self.potential_to_df(join_tree.get_bbn_potential(node))
+            df = self.potential_to_df(self.join_tree.get_bbn_potential(node))
             t = (name, df)
             data.append(t)
         return data
 
-    def drawBBN(self,bbn):
+    def draw_bbn(self):
         """Prints a structure of the BBN suing networkx library
 
         Args:
             bbn (_type_): Built BBN
         """
-        n, d = bbn.to_nx_graph()
-        pos = nx.spring_layout(n)
-        nx.draw_spring(n,with_labels=True,labels=d)
-        ax = plt.gca()
-        plt.show()
+        try:
+            n, d = self.bbn.to_nx_graph()
+            pos = nx.spring_layout(n)
+            nx.draw_spring(n, with_labels=True, labels=d)
+            ax = plt.gca()
+            plt.show()
+        except Exception as e:
+            logger.error(f"{e}")
 
-BBN()
+    def create_bbn_node(self, id, name, states_as_rows=[], cpt_as_rows=[]):
+        node = None
+        try:
+            node = BbnNode(Variable(id, name, states_as_rows), cpt_as_rows)
+            self.bbn.add_node(node)
+            return node
+        except Exception as e:
+            logger.error(f"{e}")
+        return None
+
+    def create_edge(self, from_node, to_node):
+        try:
+            self.bbn.add_edge(Edge(from_node, to_node, EdgeType.DIRECTED))
+        except Exception as e:
+            logger.error(f"{e}")
+
+    def set_join_tree(self):
+        self.join_tree = InferenceController.apply(self.bbn)
+
+    def get_join_tree(self):
+        return self.join_tree

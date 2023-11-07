@@ -191,3 +191,6 @@ class BBN:
 
     def get_join_tree(self):
         return self.join_tree
+
+    def get_children(self, node_id):
+        return self.bbn.get_children(node_id=node_id)

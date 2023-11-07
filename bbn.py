@@ -13,7 +13,6 @@ pd.set_option("display.max_rows", None)
 import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.widgets import Slider
-from scipy.stats import binom
 
 import pybbn
 from logger import logger
@@ -30,31 +29,6 @@ class BBN:
     def __init__(self) -> None:
         self.bbn = Bbn()
         self.join_tree = None
-
-    def get_binomial_prob(self, total_exp_runs, p):
-        """
-        Given number of experiments to be performed and the prior probability of success, returns the list of probabilities of successes for k trials out of total n runs
-
-        Args:
-        total_exp_runs (_type_): number of experiments
-        p (_type_): probability of success
-
-        Returns:
-        _type_: list of probabilities of success for k out of n runs
-        """
-        return list(binom.pmf(list(range(total_exp_runs + 1)), total_exp_runs, p))
-
-    def get_cdf_binomial_prob(self, total_exp_runs, p):
-        """Given number of experiments to be performed and the prior probability of success, returns the list of cumulative probabilities of successes for k trials out of total n runs
-
-        Args:
-            total_exp_runs (_type_): number of experiments
-            p (_type_): probability of success
-
-        Returns:
-            _type_: list of cumulative probabilities of success up till k out of n runs
-        """
-        return list(binom.cdf(list(range(total_exp_runs + 1)), total_exp_runs, p))
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -175,6 +149,7 @@ class BBN:
         try:
             node = BbnNode(Variable(id, name, states_as_rows), cpt_as_rows)
             self.bbn.add_node(node)
+            logger.debug(f"Added {node}")
             return node
         except Exception as e:
             logger.error(f"{e}")
@@ -193,4 +168,5 @@ class BBN:
         return self.join_tree
 
     def get_children(self, node_id):
+        logger.debug(f"{self.bbn.get_children(node_id=node_id)}")
         return self.bbn.get_children(node_id=node_id)

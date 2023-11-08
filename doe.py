@@ -107,7 +107,7 @@ class MinThresholdNode(ThresholdNode):
         keys, values = [], []
         for i in range(self.n_experiments + 1):
             keys.append(str(i))
-            if i > self.threshold:
+            if i >= self.threshold:
                 values.append([1, 0])
             else:
                 values.append([0, 1])
@@ -129,7 +129,7 @@ class GoalNode(ThresholdNode):
         keys, values = [], []
         for i in range(2**self.n_children):
             keys.append(str(i))
-            if i > 0:
+            if i == 0:
                 values.append([1, 0])
             else:
                 values.append([0, 1])

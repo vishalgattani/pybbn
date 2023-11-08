@@ -31,6 +31,8 @@ class BBN:
         self.bbn = Bbn()
         self.join_tree = None
         self.nodes = {}
+        self.leaf_nodes = {}
+        self.non_leaf_nodes = {}
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -73,7 +75,7 @@ class BBN:
         else:
             logger.error(f"Join Tree has not been set!")
 
-    def print_probs_node(self, id):
+    def get_probabilities_node(self, id):
         """Fetches posterior probabilities of particular node by using its ID
 
         Args:
@@ -86,10 +88,10 @@ class BBN:
         if self.join_tree:
             for node in self.join_tree.get_bbn_nodes():
                 if node.to_dict()["variable"]["id"] == id:
-                    logger.debug(f"Node {id}:{node.variable.name}")
+                    # logger.debug(f"Node {id}:{node.variable.name}")
                     potential = self.join_tree.get_bbn_potential(node)
                     df = self.potential_to_df(self.join_tree.get_bbn_potential(node))
-                    logger.debug(f"{df}")
+                    # logger.debug(f"{df}")
                     return df
         else:
             logger.error(f"Join Tree has not been set!")
@@ -221,7 +223,10 @@ class BBN:
             )
             if not self.get_children(node_id):
                 leaf_nodes[node_id] = self.nodes.get(node_id)
+            else:
+                self.non_leaf_nodes[node_id] = self.nodes.get(node_id)
         logger.debug(f"Leaf nodes: {leaf_nodes}")
+        self.leaf_nodes = leaf_nodes
         return leaf_nodes
 
     def get_node_identifiers(self):
@@ -230,10 +235,21 @@ class BBN:
 
     def get_bbn_dataframe(self):
         if self.join_tree:
-            NotImplemented
+            df_list = []
+            data = []
+            columns = []
+            for node_id, node_name in self.bbn.get_i2n().items():
+                if self.non_leaf_nodes.get(node_id, None):
+                    df = self.get_probabilities_node(node_id)
+                    df.p = df.p.round(4)
+                    df_list.append(df)
+                    data.append(df.p[0])
+                    data.append(df.p[1])
+            return data
         else:
             logger.error(f"Join Tree has not been set!")
+            return None
 
     def print_nodes(self):
         for node_id, node_name in self.bbn.get_i2n().items():
-            self.print_probs_node(node_id)
+            self.get_probabilities_node(node_id)

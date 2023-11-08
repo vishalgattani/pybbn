@@ -15,6 +15,7 @@ import networkx as nx
 from matplotlib.widgets import Slider
 
 import pybbn
+from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
 from logger import logger
 from pybbn.graph.dag import Bbn
 from pybbn.graph.edge import Edge, EdgeType
@@ -29,6 +30,7 @@ class BBN:
     def __init__(self) -> None:
         self.bbn = Bbn()
         self.join_tree = None
+        self.nodes = {}
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -84,7 +86,7 @@ class BBN:
         if self.join_tree:
             for node in self.join_tree.get_bbn_nodes():
                 if node.to_dict()["variable"]["id"] == id:
-                    logger.debug(f"Node:{node.variable.name}")
+                    logger.debug(f"Node {id}:{node.variable.name}")
                     potential = self.join_tree.get_bbn_potential(node)
                     df = self.potential_to_df(self.join_tree.get_bbn_potential(node))
                     logger.debug(f"{df}")
@@ -137,6 +139,8 @@ class BBN:
         """
         try:
             n, d = self.bbn.to_nx_graph()
+            logger.debug(d)
+            d = {key: key for key, value in d.items()}
             pos = nx.spring_layout(n)
             nx.draw_spring(n, with_labels=True, labels=d)
             ax = plt.gca()
@@ -144,12 +148,22 @@ class BBN:
         except Exception as e:
             logger.error(f"{e}")
 
-    def create_bbn_node(self, id, name, states_as_rows=[], cpt_as_rows=[]):
+    def create_bbn_node(
+        self,
+        id,
+        name,
+        node_type: [ThresholdNode, MaxThresholdNode, MinThresholdNode, GoalNode],
+    ):
         node = None
         try:
-            node = BbnNode(Variable(id, name, states_as_rows), cpt_as_rows)
+            logger.debug(f"{id} CPT STATES: {(node_type.get_cpt_states())}")
+            logger.debug(f"{id} CPT LIST: {node_type.get_cpt_list()}")
+            node = BbnNode(
+                Variable(id, name, node_type.get_cpt_states()), node_type.get_cpt_list()
+            )
             self.bbn.add_node(node)
-            logger.debug(f"Added {node}")
+            self.nodes[id] = node_type
+            logger.debug(f"Added {name}({id}) of type '{type(node_type).__name__}'")
             return node
         except Exception as e:
             logger.error(f"{e}")
@@ -205,8 +219,8 @@ class BBN:
             logger.debug(
                 f"Parent of {node_name}({node_id}):{self.get_parent(node_id=node_id)}"
             )
-            if not self.get_parent(node_id):
-                leaf_nodes[node_id] = node_name
+            if not self.get_children(node_id):
+                leaf_nodes[node_id] = self.nodes.get(node_id)
         logger.debug(f"Leaf nodes: {leaf_nodes}")
         return leaf_nodes
 
@@ -215,4 +229,11 @@ class BBN:
         return self.bbn.i2n()
 
     def get_bbn_dataframe(self):
-        NotImplemented
+        if self.join_tree:
+            NotImplemented
+        else:
+            logger.error(f"Join Tree has not been set!")
+
+    def print_nodes(self):
+        for node_id, node_name in self.bbn.get_i2n().items():
+            self.print_probs_node(node_id)

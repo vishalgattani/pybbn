@@ -38,7 +38,7 @@ class App(customtkinter.CTk):
         y = (screen_height - self.winfo_reqheight()) // 2
         logger.debug(f"{x}x{y}")
         # Set the window's position
-        self.geometry(f"{x}x{y}")
+        self.geometry(f"+{x//2}+{y//2}")
 
         # configure grid layout (4x4)
         self.grid_columnconfigure(1, weight=1)

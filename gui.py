@@ -26,7 +26,6 @@ class App(customtkinter.CTk):
 
         self.bbn_dataframe = bbn.get_bbn_dataframe()
         self.bbn_dataframe = self.bbn_dataframe.rename_axis(index="Requirement")
-        logger.debug(f"{self.bbn_dataframe}")
         # configure window
         self.title(f"PyBBN Assurance Case")
         # Get the screen width and height
@@ -34,8 +33,8 @@ class App(customtkinter.CTk):
         screen_width, screen_height = primary_monitor.width, primary_monitor.height
 
         # Calculate the x and y coordinates for the window to be centered
-        x = (screen_width - self.winfo_reqwidth()) // 2
-        y = (screen_height - self.winfo_reqheight()) // 2
+        x = (screen_width - self.winfo_reqwidth()) // 8
+        y = (screen_height - self.winfo_reqheight()) // 8
         # Set the window's position
         self.geometry(f"+{x//2}+{y//2}")
 
@@ -44,8 +43,8 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
-        self.image_path = self.get_assurance_case_svg(bbn)
-        self.image = Image.open(self.image_path)
+        self.image_path = bbn.get_assurance_case_png()
+        self.image = Image.open(bbn.get_assurance_case_png())
         self.large_test_image = customtkinter.CTkImage(
             self.image, size=(self.image.width, self.image.height)
         )
@@ -288,27 +287,18 @@ class App(customtkinter.CTk):
         # Bar width and x positions
         bar_width = 0.35
         x_pos = np.arange(len(["True", "False"]))
-        logger.debug(f"{df_subset}")
         true_values, false_values = df_subset[0], df_subset[1]
-        logger.debug(f"{title}:[{true_values},{false_values}]")
         ax.bar(x_pos, true_values, bar_width, color="g", label="True")
         ax.bar(x_pos + bar_width, false_values, bar_width, color="r", label="False")
-
         ax.set_ylim(0, 1)
         ax.set_title(title)
         ax.set_xticks([0, bar_width])
         ax.set_xticklabels(["True", "False"])
 
     def show(self, cell):
-        print("row:", cell["row"])
-        print("column:", cell["column"])
-        print("value:", cell["value"])
-
-    def get_assurance_case_svg(self, bbn: BBN):
-        svg_path = pathlib.Path(bbn.assurance_case_svg_name).resolve()
-        png_path = svg_path.parent / f"{bbn.assurance_case_name}.png"
-        cairosvg.svg2png(url=str(svg_path), write_to=str(png_path))
-        return str(png_path)
+        logger.debug(
+            f"Table value clicked: {cell['value']} ({cell['row']}x{cell['column']})"
+        )
 
     def open_input_dialog_event(self):
         dialog = customtkinter.CTkInputDialog(

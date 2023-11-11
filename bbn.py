@@ -2,9 +2,12 @@ import subprocess
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
+import cairosvg
 import numpy as np
 
 np.seterr(invalid="ignore")
+import pathlib
+
 import pandas as pd
 
 pd.set_option("display.max_rows", None)
@@ -241,7 +244,7 @@ class BBN:
                 leaf_nodes[node_id] = self.nodes.get(node_id)
             else:
                 self.non_leaf_nodes[node_id] = self.nodes.get(node_id)
-        logger.debug(f"Leaf nodes: {leaf_nodes}")
+        # logger.debug(f"Leaf nodes: {leaf_nodes}")
         self.leaf_nodes = leaf_nodes
         return leaf_nodes
 
@@ -252,24 +255,14 @@ class BBN:
     def get_bbn_dataframe(self):
         if self.join_tree:
             df_list = []
-            data = []
-            columns = []
             d = {}
             for node_id, node_name in self.bbn.get_i2n().items():
                 if self.non_leaf_nodes.get(node_id, None):
-                    logger.debug(f"{self.non_leaf_nodes[node_id].name}")
                     df = self.get_probabilities_node(node_id)
                     df.p = df.p.round(4)
                     df_list.append(df)
-                    data.append(df.p[0])  # true
-                    columns.append(f"{self.non_leaf_nodes[node_id].name}")
-                    data.append(df.p[1])  # false
-                    columns.append(f"{self.non_leaf_nodes[node_id].name}")
                     d[self.non_leaf_nodes[node_id].name] = [df.p[0], df.p[1]]
-            df = pd.DataFrame(d)
-
-            df = df.transpose()
-            df = df.rename(columns={0: "True", 1: "False"})
+            df = pd.DataFrame(d).transpose().rename(columns={0: "True", 1: "False"})
             return df
         else:
             logger.error(f"Join Tree has not been set!")
@@ -308,7 +301,7 @@ class BBN:
                 "supportedBy": supported_by_list,
             }
 
-        logger.debug(yaml_dict)
+        # logger.debug(yaml_dict)
         yaml_output = yaml.dump(yaml_dict, default_flow_style=True)
         # Print or save the YAML output
         with open(f"{self.assurance_case_yaml_name}", "w") as file:
@@ -316,10 +309,21 @@ class BBN:
 
         command = f"./gsn2x-macOS {self.assurance_case_yaml_name}"
 
-        # Run the command
-        subprocess.run(command, shell=True)
+        # Run the command to generate assurance case yaml
+        output = subprocess.run(command, shell=True)
+        assert (
+            pathlib.Path.cwd() / f"{self.assurance_case_name}.png"
+        ).is_file(), f"Assurance case couldn't be generated"
+        logger.debug(f"Generated assurance case SVG: {output}")
+        self.get_assurance_case_png()
 
         # flowchart = self.create_flowchart(yaml_dict)
         # # Save the flowchart to a file (in DOT format)
         # flowchart.render("flowchart", format="png", cleanup=True)
         return yaml_output
+
+    def get_assurance_case_png(self):
+        svg_path = pathlib.Path(self.assurance_case_svg_name).resolve()
+        png_path = svg_path.parent / f"{self.assurance_case_name}.png"
+        cairosvg.svg2png(url=str(svg_path), write_to=str(png_path))
+        return str(png_path)

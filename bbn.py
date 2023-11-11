@@ -263,14 +263,20 @@ class BBN:
                     df = self.get_probabilities_node(node_id)
                     df.p = df.p.round(4)
                     df_list.append(df)
-                    data.append(df.p[0])
-                    columns.append(f"{self.non_leaf_nodes[node_id].name} (P=True)")
-                    data.append(df.p[1])
-                    columns.append(f"{self.non_leaf_nodes[node_id].name} (P=False)")
+                    data.append(df.p[0])  # true
+                    columns.append(f"{self.non_leaf_nodes[node_id].name}")
+                    data.append(df.p[1])  # false
+                    columns.append(f"{self.non_leaf_nodes[node_id].name}")
 
             df = pd.DataFrame(data, columns=["Values"], index=columns)
+            df = df.reset_index()
+            df.index = df.index // 2
             logger.debug(f"{df}")
-            return df
+            list_of_lists = []
+            for idx, group in df.groupby(df.index):
+                values_list = [group.iloc[0, 0]] + group["Values"].tolist()
+                list_of_lists.append(values_list)
+            return df, list_of_lists
         else:
             logger.error(f"Join Tree has not been set!")
             return None

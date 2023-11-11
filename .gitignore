@@ -6,3 +6,5 @@ __pycache__
 **/*.png
 **.*yaml
 **/*.ipynb
+**/*.svg
+evidences.md

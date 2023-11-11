@@ -1,5 +1,6 @@
 import os
 import pathlib
+import subprocess
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -9,7 +10,6 @@ np.seterr(invalid="ignore")
 import pandas as pd
 
 pd.set_option("display.max_rows", None)
-
 import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
@@ -36,6 +36,10 @@ class BBN:
         self.non_leaf_nodes = {}
         self.goal_node = {}
         self.n_experiments = n_experiments
+        self.assurance_case_name = "assurance_case"
+        self.assurance_case_yaml_name = f"{self.assurance_case_name}.yaml"
+        self.assurance_case_svg_name = f"{self.assurance_case_name}.svg"
+        self.assurance_case_yaml = None
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -191,6 +195,7 @@ class BBN:
 
     def set_join_tree(self):
         self.join_tree = InferenceController.apply(self.bbn)
+        self.assurance_case_yaml = self.bbn2yaml()
 
     def get_join_tree(self):
         return self.join_tree
@@ -300,9 +305,15 @@ class BBN:
         logger.debug(yaml_dict)
         yaml_output = yaml.dump(yaml_dict, default_flow_style=True)
         # Print or save the YAML output
-        with open("output.yaml", "w") as file:
+        with open(f"{self.assurance_case_yaml_name}", "w") as file:
             yaml.dump(yaml_dict, file, default_flow_style=False)
 
-        flowchart = self.create_flowchart(yaml_dict)
-        # Save the flowchart to a file (in DOT format)
-        flowchart.render("flowchart", format="png", cleanup=True)
+        command = f"./gsn2x-macOS {self.assurance_case_yaml_name}"
+
+        # Run the command
+        subprocess.run(command, shell=True)
+
+        # flowchart = self.create_flowchart(yaml_dict)
+        # # Save the flowchart to a file (in DOT format)
+        # flowchart.render("flowchart", format="png", cleanup=True)
+        return yaml_output

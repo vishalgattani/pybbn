@@ -1,3 +1,4 @@
+import subprocess
 import sys
 
 import numpy as np
@@ -6,7 +7,6 @@ import pandas as pd
 from bbn import BBN
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
 from gui import App
-from helper import get_binomial_prob, get_cdf_binomial_prob
 from logger import logger
 
 n_experiments = 5
@@ -69,8 +69,7 @@ bbn.create_edge(mission_times_pose_within_threshold, mission_pose_in_threshold)
 bbn.create_edge(mission_pose_in_threshold, mission_success)
 bbn.set_join_tree()
 bbn.get_leaf_nodes()
-bbn.bbn2yaml()
-data = bbn.get_bbn_dataframe()
+# data = bbn.get_bbn_dataframe()
 
-app = App()
+app = App(bbn=bbn)
 app.mainloop()

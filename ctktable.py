@@ -17,8 +17,8 @@ class CTkTable(customtkinter.CTkFrame):
         master: any,
         row: int = None,
         column: int = None,
-        padx: int = 0,
-        pady: int = 0,
+        padx: int = 1,
+        pady: int = 1,
         values: list = [[None]],
         colors: list = [None, None],
         orientation: str = "horizontal",
@@ -47,7 +47,7 @@ class CTkTable(customtkinter.CTkFrame):
         self.pady = pady
         self.command = command
         self.values = values  # the default values of the table
-        self.colors = colors  # colors of the table if required
+        self.colors = ["white", "white"]  # colors of the table if required
         self.header_color = header_color  # specify the topmost row color
         self.phase = color_phase
         self.corner = corner_radius

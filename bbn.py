@@ -1,5 +1,3 @@
-import os
-import pathlib
 import subprocess
 import warnings
 
@@ -15,7 +13,6 @@ import networkx as nx
 import yaml
 from graphviz import Digraph
 
-import pybbn
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
 from logger import logger
 from pybbn.graph.dag import Bbn
@@ -257,6 +254,7 @@ class BBN:
             df_list = []
             data = []
             columns = []
+            d = {}
             for node_id, node_name in self.bbn.get_i2n().items():
                 if self.non_leaf_nodes.get(node_id, None):
                     logger.debug(f"{self.non_leaf_nodes[node_id].name}")
@@ -267,16 +265,12 @@ class BBN:
                     columns.append(f"{self.non_leaf_nodes[node_id].name}")
                     data.append(df.p[1])  # false
                     columns.append(f"{self.non_leaf_nodes[node_id].name}")
+                    d[self.non_leaf_nodes[node_id].name] = [df.p[0], df.p[1]]
+            df = pd.DataFrame(d)
 
-            df = pd.DataFrame(data, columns=["Values"], index=columns)
-            df = df.reset_index()
-            df.index = df.index // 2
-            logger.debug(f"{df}")
-            list_of_lists = []
-            for idx, group in df.groupby(df.index):
-                values_list = [group.iloc[0, 0]] + group["Values"].tolist()
-                list_of_lists.append(values_list)
-            return df, list_of_lists
+            df = df.transpose()
+            df = df.rename(columns={0: "True", 1: "False"})
+            return df
         else:
             logger.error(f"Join Tree has not been set!")
             return None

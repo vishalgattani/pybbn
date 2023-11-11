@@ -3,3 +3,6 @@ __pycache__
 **/*.log
 .log
 **/.DS_Store
+**/*.png
+**.*yaml
+**/*.ipynb

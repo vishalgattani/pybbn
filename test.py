@@ -17,7 +17,7 @@ mission_success = bbn.create_bbn_node(GoalNode(0, "Meeting requirements", n_chil
 mission_all_waypoints = bbn.create_bbn_node(
     node_type=MinThresholdNode(
         id=1,
-        name=f"Robot Nav Terrain Threshold",
+        name=f"Robot Nav Terrain under Threshold",
         n_experiments=bbn.n_experiments,
         threshold=0,
     )
@@ -33,7 +33,10 @@ mission_times_navigable_terrain = bbn.create_bbn_node(
 
 mission_no_collision = bbn.create_bbn_node(
     MaxThresholdNode(
-        3, f"Robot Collision Threshold", n_experiments=bbn.n_experiments, threshold=0
+        3,
+        f"Robot Collision under Threshold",
+        n_experiments=bbn.n_experiments,
+        threshold=0,
     )
 )
 
@@ -48,7 +51,7 @@ mission_times_collision = bbn.create_bbn_node(
 
 mission_pose_in_threshold = bbn.create_bbn_node(
     MinThresholdNode(
-        5, f"Robot Pose Threshold", n_experiments=bbn.n_experiments, threshold=0
+        5, f"Robot Pose under Threshold", n_experiments=bbn.n_experiments, threshold=0
     )
 )
 

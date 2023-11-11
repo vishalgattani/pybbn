@@ -259,12 +259,18 @@ class BBN:
             columns = []
             for node_id, node_name in self.bbn.get_i2n().items():
                 if self.non_leaf_nodes.get(node_id, None):
+                    logger.debug(f"{self.non_leaf_nodes[node_id].name}")
                     df = self.get_probabilities_node(node_id)
                     df.p = df.p.round(4)
                     df_list.append(df)
                     data.append(df.p[0])
+                    columns.append(f"{self.non_leaf_nodes[node_id].name} (P=True)")
                     data.append(df.p[1])
-            return data
+                    columns.append(f"{self.non_leaf_nodes[node_id].name} (P=False)")
+
+            df = pd.DataFrame(data, columns=["Values"], index=columns)
+            logger.debug(f"{df}")
+            return df
         else:
             logger.error(f"Join Tree has not been set!")
             return None

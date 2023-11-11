@@ -11,6 +11,7 @@ from PIL import Image
 from screeninfo import get_monitors
 
 from bbn import BBN
+from ctktable import *
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
 from logger import logger
 
@@ -26,7 +27,8 @@ class App(customtkinter.CTk):
     def __init__(self, bbn: BBN):
         super().__init__()
 
-        image_path = self.get_assurance_case_svg(bbn)
+        self.bbn_dataframe = bbn.get_bbn_dataframe()
+        logger.debug(f"{self.bbn_dataframe}")
         # configure window
         self.title(f"PyBBN Assurance Case")
         # Get the screen width and height
@@ -36,7 +38,6 @@ class App(customtkinter.CTk):
         # Calculate the x and y coordinates for the window to be centered
         x = (screen_width - self.winfo_reqwidth()) // 2
         y = (screen_height - self.winfo_reqheight()) // 2
-        logger.debug(f"{x}x{y}")
         # Set the window's position
         self.geometry(f"+{x//2}+{y//2}")
 
@@ -45,8 +46,10 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
+        self.image_path = self.get_assurance_case_svg(bbn)
+        self.image = Image.open(self.image_path)
         self.large_test_image = customtkinter.CTkImage(
-            Image.open(image_path), size=(500, 150)
+            self.image, size=(self.image.width, self.image.height)
         )
 
         # create sidebar frame with widgets
@@ -110,7 +113,11 @@ class App(customtkinter.CTk):
 
         # create textbox
         self.textbox = customtkinter.CTkLabel(
-            self, image=self.large_test_image, text=""
+            self,
+            image=self.large_test_image,
+            text="",
+            width=self.image.width,
+            height=self.image.height,
         )
         self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
 
@@ -147,30 +154,45 @@ class App(customtkinter.CTk):
         )
         self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
 
+        bbn_table_values = self.bbn_dataframe.reset_index().values.tolist()
+        frame = customtkinter.CTkFrame(self)
+        # frame.pack(expand=True, fill="both")
+        frame.grid(row=0, column=3, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        table = CTkTable(
+            master=frame,
+            row=len(bbn_table_values),
+            column=len(bbn_table_values[0]),
+            values=bbn_table_values,
+            height=100,
+            command=self.show,
+        )
+        # table.pack(expand=True, fill="both", padx=20, pady=20)
+        table.grid(row=0, column=2, columnspan=1, padx=10, pady=10, sticky="")
+
         # create radiobutton frame
-        self.radiobutton_frame = customtkinter.CTkFrame(self)
-        self.radiobutton_frame.grid(
-            row=0, column=3, padx=(20, 20), pady=(20, 0), sticky="nsew"
-        )
-        self.radio_var = tkinter.IntVar(value=0)
-        self.label_radio_group = customtkinter.CTkLabel(
-            master=self.radiobutton_frame, text="CTkRadioButton Group:"
-        )
-        self.label_radio_group.grid(
-            row=0, column=2, columnspan=1, padx=10, pady=10, sticky=""
-        )
-        self.radio_button_1 = customtkinter.CTkRadioButton(
-            master=self.radiobutton_frame, variable=self.radio_var, value=0
-        )
-        self.radio_button_1.grid(row=1, column=2, pady=10, padx=20, sticky="n")
-        self.radio_button_2 = customtkinter.CTkRadioButton(
-            master=self.radiobutton_frame, variable=self.radio_var, value=1
-        )
-        self.radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="n")
-        self.radio_button_3 = customtkinter.CTkRadioButton(
-            master=self.radiobutton_frame, variable=self.radio_var, value=2
-        )
-        self.radio_button_3.grid(row=3, column=2, pady=10, padx=20, sticky="n")
+        # self.radiobutton_frame = customtkinter.CTkFrame(self)
+        # self.radiobutton_frame.grid(
+        #     row=0, column=3, padx=(20, 20), pady=(20, 0), sticky="nsew"
+        # )
+        # self.radio_var = tkinter.IntVar(value=0)
+        # self.label_radio_group = CTkTable(
+        #     master=self.radiobutton_frame
+        # )
+        # self.label_radio_group.grid(
+        #     row=0, column=2, columnspan=1, padx=10, pady=10, sticky=""
+        # )
+        # self.radio_button_1 = customtkinter.CTkRadioButton(
+        #     master=self.radiobutton_frame, variable=self.radio_var, value=0
+        # )
+        # self.radio_button_1.grid(row=1, column=2, pady=10, padx=20, sticky="n")
+        # self.radio_button_2 = customtkinter.CTkRadioButton(
+        #     master=self.radiobutton_frame, variable=self.radio_var, value=1
+        # )
+        # self.radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="n")
+        # self.radio_button_3 = customtkinter.CTkRadioButton(
+        #     master=self.radiobutton_frame, variable=self.radio_var, value=2
+        # )
+        # self.radio_button_3.grid(row=3, column=2, pady=10, padx=20, sticky="n")
 
         # create slider and progressbar frame
         self.slider_progressbar_frame = customtkinter.CTkFrame(
@@ -246,7 +268,7 @@ class App(customtkinter.CTk):
         self.checkbox_1.select()
         self.scrollable_frame_switches[0].select()
         self.scrollable_frame_switches[4].select()
-        self.radio_button_3.configure(state="disabled")
+        # self.radio_button_3.configure(state="disabled")
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
         self.optionmenu_1.set("CTkOptionmenu")
@@ -258,6 +280,11 @@ class App(customtkinter.CTk):
         # self.textbox.insert("0.0", "CTkTextbox\n\n" + "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\n" * 20)
         self.seg_button_1.configure(values=["CTkSegmentedButton", "Value 2", "Value 3"])
         self.seg_button_1.set("Value 2")
+
+    def show(self, cell):
+        print("row:", cell["row"])
+        print("column:", cell["column"])
+        print("value:", cell["value"])
 
     def get_assurance_case_svg(self, bbn: BBN):
         svg_path = pathlib.Path(bbn.assurance_case_svg_name).resolve()

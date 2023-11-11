@@ -19,10 +19,15 @@ class Experiment:
 
 
 class SuccessNode:
-    def __init__(self, n_experiments, probability_of_success) -> None:
+    def __init__(self, id, name, n_experiments, probability_of_success) -> None:
         self.probability_list = None
         self.cpt = None
         self.states = None
+        self.id = id
+        self.name = name
+        self.child = []
+        self.parent = []
+
         self.set_cpt(
             n_experiments=n_experiments, probability_of_success=probability_of_success
         )
@@ -46,11 +51,15 @@ class SuccessNode:
 
 
 class ThresholdNode:
-    def __init__(self, n_experiments, threshold) -> None:
+    def __init__(self, id=None, name=None, n_experiments=None, threshold=None) -> None:
         self.cpt = None
         self.n_experiments = n_experiments
         self.threshold = threshold
         self.states = None
+        self.id = id
+        self.name = name
+        self.child = []
+        self.parent = []
 
     def get_n_experiments(self):
         return self.n_experiments
@@ -72,9 +81,13 @@ class MaxThresholdNode(ThresholdNode):
         ThresholdNode (_type_): _description_
     """
 
-    def __init__(self, n_experiments, threshold) -> None:
-        super().__init__(n_experiments, threshold)
+    def __init__(self, id, name, n_experiments, threshold) -> None:
+        super().__init__(
+            id=id, name=name, n_experiments=n_experiments, threshold=threshold
+        )
         self.set_cpt()
+        self.child = []
+        self.parent = []
 
     def set_cpt(self):
         keys, values = [], []
@@ -99,9 +112,13 @@ class MinThresholdNode(ThresholdNode):
         ThresholdNode (_type_): _description_
     """
 
-    def __init__(self, n_experiments, threshold) -> None:
-        super().__init__(n_experiments, threshold)
+    def __init__(self, id, name, n_experiments, threshold) -> None:
+        super().__init__(
+            id=id, name=name, n_experiments=n_experiments, threshold=threshold
+        )
         self.set_cpt()
+        self.child = []
+        self.parent = []
 
     def set_cpt(self):
         keys, values = [], []
@@ -119,10 +136,14 @@ class MinThresholdNode(ThresholdNode):
 
 
 class GoalNode(ThresholdNode):
-    def __init__(self, n_children) -> None:
+    def __init__(self, id, name, n_children) -> None:
+        self.id = id
+        self.name = name
         self.cpt = None
         self.n_children = n_children
         self.states = None
+        self.child = []
+        self.parent = []
         self.initialize()
 
     def initialize(self):

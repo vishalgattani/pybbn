@@ -5,47 +5,61 @@ import pandas as pd
 
 from bbn import BBN
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
+from gui import App
 from helper import get_binomial_prob, get_cdf_binomial_prob
 from logger import logger
 
-bbn = BBN()
+n_experiments = 5
 
-mission_success = bbn.create_bbn_node(0, "Meeting requirements", GoalNode(n_children=3))
+bbn = BBN(n_experiments=n_experiments)
+
+mission_success = bbn.create_bbn_node(GoalNode(0, "Meeting requirements", n_children=3))
 mission_all_waypoints = bbn.create_bbn_node(
-    id=1,
-    name=f"Robot reached all waypoints by traversing atleast {MinThresholdNode(n_experiments=3,threshold=0).get_threshold()} times on navigable terrain",
-    node_type=MinThresholdNode(n_experiments=1, threshold=0),
+    node_type=MinThresholdNode(
+        id=1,
+        name=f"Robot Nav Terrain Threshold",
+        n_experiments=bbn.n_experiments,
+        threshold=0,
+    )
 )
 mission_times_navigable_terrain = bbn.create_bbn_node(
-    2,
-    "Number of times navigable terrain traversed over wanted terrain",
-    node_type=SuccessNode(n_experiments=1, probability_of_success=0.9),
+    node_type=SuccessNode(
+        2,
+        "Number of times navigable terrain traversed over wanted terrain",
+        n_experiments=bbn.n_experiments,
+        probability_of_success=0.9,
+    ),
 )
 
 mission_no_collision = bbn.create_bbn_node(
-    3,
-    f"Robot collided at max {MaxThresholdNode(n_experiments=3,threshold=0).get_threshold()}",
-    MaxThresholdNode(n_experiments=3, threshold=0),
+    MaxThresholdNode(
+        3, f"Robot Collision Threshold", n_experiments=bbn.n_experiments, threshold=0
+    )
 )
 
 mission_times_collision = bbn.create_bbn_node(
-    4,
-    "Number of times robot not collide",
-    SuccessNode(n_experiments=1, probability_of_success=0.1),
+    SuccessNode(
+        4,
+        "Number of times robot not collide",
+        n_experiments=bbn.n_experiments,
+        probability_of_success=0.1,
+    )
 )
 
 mission_pose_in_threshold = bbn.create_bbn_node(
-    5,
-    f"Robot pose within threshold atleast {MinThresholdNode(n_experiments=3,threshold=0).get_threshold()}",
-    MinThresholdNode(n_experiments=1, threshold=0),
+    MinThresholdNode(
+        5, f"Robot Pose Threshold", n_experiments=bbn.n_experiments, threshold=0
+    )
 )
 
 mission_times_pose_within_threshold = bbn.create_bbn_node(
-    6,
-    "Number of times robot pose within threshold",
-    SuccessNode(n_experiments=1, probability_of_success=0.9),
+    SuccessNode(
+        6,
+        "Number of times robot pose within region",
+        n_experiments=bbn.n_experiments,
+        probability_of_success=0.9,
+    )
 )
-
 
 bbn.create_edge(mission_times_navigable_terrain, mission_all_waypoints)
 bbn.create_edge(mission_all_waypoints, mission_success)
@@ -55,5 +69,8 @@ bbn.create_edge(mission_times_pose_within_threshold, mission_pose_in_threshold)
 bbn.create_edge(mission_pose_in_threshold, mission_success)
 bbn.set_join_tree()
 bbn.get_leaf_nodes()
+bbn.bbn2yaml()
 data = bbn.get_bbn_dataframe()
-print(data)
+
+app = App()
+app.mainloop()

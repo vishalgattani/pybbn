@@ -12,7 +12,8 @@ pd.set_option("display.max_rows", None)
 
 import matplotlib.pyplot as plt
 import networkx as nx
-from matplotlib.widgets import Slider
+import yaml
+from graphviz import Digraph
 
 import pybbn
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
@@ -27,12 +28,14 @@ from pybbn.sampling.sampling import LogicSampler
 
 
 class BBN:
-    def __init__(self) -> None:
+    def __init__(self, n_experiments) -> None:
         self.bbn = Bbn()
         self.join_tree = None
         self.nodes = {}
         self.leaf_nodes = {}
         self.non_leaf_nodes = {}
+        self.goal_node = {}
+        self.n_experiments = n_experiments
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -152,20 +155,24 @@ class BBN:
 
     def create_bbn_node(
         self,
-        id,
-        name,
-        node_type: [ThresholdNode, MaxThresholdNode, MinThresholdNode, GoalNode],
+        # id,
+        # name,
+        node_type,
     ):
         node = None
         try:
-            logger.debug(f"{id} CPT STATES: {(node_type.get_cpt_states())}")
-            logger.debug(f"{id} CPT LIST: {node_type.get_cpt_list()}")
             node = BbnNode(
-                Variable(id, name, node_type.get_cpt_states()), node_type.get_cpt_list()
+                Variable(node_type.id, node_type.name, node_type.get_cpt_states()),
+                node_type.get_cpt_list(),
             )
             self.bbn.add_node(node)
+            id = node_type.id
             self.nodes[id] = node_type
-            logger.debug(f"Added {name}({id}) of type '{type(node_type).__name__}'")
+            logger.debug(
+                f"Added {node_type.name}({node_type.id}) of type '{type(node_type).__name__}'"
+            )
+            if type(node_type).__name__ == GoalNode.__name__:
+                self.goal_node[id] = node_type
             return node
         except Exception as e:
             logger.error(f"{e}")
@@ -173,7 +180,12 @@ class BBN:
 
     def create_edge(self, from_node, to_node):
         try:
+            self.nodes[from_node.variable.id].parent.append(to_node.variable.id)
+            self.nodes[to_node.variable.id].child.append(from_node.variable.id)
             self.bbn.add_edge(Edge(from_node, to_node, EdgeType.DIRECTED))
+            logger.debug(
+                f"Added edge from {from_node.variable.name}({from_node.variable.id}) --> {to_node.variable.name}({to_node.variable.id})"
+            )
         except Exception as e:
             logger.error(f"{e}")
 
@@ -214,13 +226,15 @@ class BBN:
             _type_: _description_
         """
         leaf_nodes = {}
+        # logger.info(f"{self.nodes}")
         for node_id, node_name in self.bbn.get_i2n().items():
-            logger.debug(
-                f"Children of {node_name}({node_id}):{self.get_children(node_id=node_id)}"
-            )
-            logger.debug(
-                f"Parent of {node_name}({node_id}):{self.get_parent(node_id=node_id)}"
-            )
+            # logger.debug(f"{node_id}:{node_name}")
+            # logger.debug(
+            #     f"Children of ({node_id}){node_name}:{self.get_children(node_id=node_id)}"
+            # )
+            # logger.debug(
+            #     f"Parent of ({node_id}){node_name}:{self.get_parent(node_id=node_id)}"
+            # )
             if not self.get_children(node_id):
                 leaf_nodes[node_id] = self.nodes.get(node_id)
             else:
@@ -253,3 +267,42 @@ class BBN:
     def print_nodes(self):
         for node_id, node_name in self.bbn.get_i2n().items():
             self.get_probabilities_node(node_id)
+
+    def create_flowchart(self, yaml_data):
+        # Create a Digraph object
+        graph = Digraph(comment="Flowchart", format="png", graph_attr={"rankdir": "BT"})
+
+        # Add nodes and edges based on YAML data
+        for key, value in yaml_data.items():
+            logger.debug(key)
+            # Add node for the current key
+            node_shape = "box" if key.startswith("G") else "ellipse"
+            graph.node(key, label=value["text"], shape=node_shape)
+
+            # Add edges for supportedBy relationships
+            for supported_by in value["supportedBy"]:
+                graph.edge(supported_by, key)
+
+        return graph
+
+    def bbn2yaml(self):
+        yaml_dict = {}
+        for node_id, node in self.nodes.items():
+            logger.debug(f"{node_id}:{node}:{node.name}")
+            logger.debug(f"{node_id}:Child of {node.child}")
+            logger.debug(f"{node_id}:Parent to {node.parent}")
+            supported_by_list = [f"G{id}" for id in node.child]
+            yaml_dict[f"G{node_id}"] = {
+                "text": node.name,
+                "supportedBy": supported_by_list,
+            }
+
+        logger.debug(yaml_dict)
+        yaml_output = yaml.dump(yaml_dict, default_flow_style=True)
+        # Print or save the YAML output
+        with open("output.yaml", "w") as file:
+            yaml.dump(yaml_dict, file, default_flow_style=False)
+
+        flowchart = self.create_flowchart(yaml_dict)
+        # Save the flowchart to a file (in DOT format)
+        flowchart.render("flowchart", format="png", cleanup=True)

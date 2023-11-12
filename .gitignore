@@ -8,3 +8,4 @@ __pycache__
 **/*.ipynb
 **/*.svg
 evidences.md
+test/

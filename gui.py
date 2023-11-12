@@ -1,6 +1,5 @@
 import pathlib
 
-import cairosvg
 import customtkinter
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +24,18 @@ customtkinter.set_default_color_theme(
 class App(customtkinter.CTk):
     def __init__(self, bbn: BBN):
         super().__init__()
+        self.configure_gui(bbn)
 
+    def update_gui_with_new_bbn(self, new_bbn: BBN):
+        # Call this method when you want to update the GUI with a new BBN instance
+        self.scrollable_slider_frame.destroy()
+        self.table_frame.destroy()
+        self.sidebar_frame.destroy()
+        self.slider_progressbar_frame.destroy()
+        self.bar_plot_frame.destroy()
+        self.configure_gui(new_bbn)
+
+    def configure_gui(self, bbn: BBN):
         self.n_experiments = bbn.n_experiments
         self.n_sliders = 0
         self.n_probability_sliders = 0
@@ -33,7 +43,6 @@ class App(customtkinter.CTk):
         self.probability_nodes = []
         self.threshold_nodes = []
         for id, node in bbn.nodes.items():
-            logger.debug(f"{id}:{type(node).__name__}")
             if type(node).__name__ != GoalNode.__name__:
                 self.n_sliders += 1
                 if type(node).__name__ != SuccessNode.__name__:
@@ -42,11 +51,10 @@ class App(customtkinter.CTk):
             if type(node).__name__ == SuccessNode.__name__:
                 self.n_probability_sliders += 1
                 self.probability_nodes.append(node)
-        logger.debug(f"p: {self.n_probability_sliders}")
-        logger.debug(f"t: {self.n_threshold_sliders}")
 
         self.bbn_dataframe = bbn.get_bbn_dataframe()
         self.bbn_dataframe = self.bbn_dataframe.rename_axis(index="Requirement")
+        self.bbn_assurance_case_dictionary = bbn.assurance_case_dictionary
         # configure window
         self.title(f"PyBBN Assurance Case")
         # Get the screen width and height
@@ -70,7 +78,7 @@ class App(customtkinter.CTk):
             self.image, size=(self.image.width, self.image.height)
         )
 
-        # create sidebar frame with widgets
+        # create sidebarframe with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
@@ -127,20 +135,22 @@ class App(customtkinter.CTk):
 
         bbn_table_values = self.bbn_dataframe.reset_index().values.tolist()
         # bbn_table_values = self.table_values
-        frame = customtkinter.CTkFrame(self, fg_color="transparent")
-        # frame.pack(expand=True, fill="both")
-        frame.grid(row=1, column=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
-        table = CTkTable(
-            master=frame,
+        self.table_frame = customtkinter.CTkFrame(self, fg_color="transparent")
+        # self.table_frame.pack(expand=True, fill="both")
+        self.table_frame.grid(
+            row=1, column=2, padx=(20, 20), pady=(20, 0), sticky="nsew"
+        )
+        self.table = CTkTable(
+            master=self.table_frame,
             row=len(bbn_table_values),
             column=len(bbn_table_values[0]),
             values=bbn_table_values,
             height=100,
             command=self.show,
         )
-        table.grid(row=0, column=2, columnspan=1, padx=5, pady=5, sticky="")
+        self.table.grid(row=0, column=2, columnspan=1, padx=5, pady=5, sticky="")
 
-        # create slider and progressbar frame
+        # create slider and progressbarframe
         self.slider_progressbar_frame = customtkinter.CTkFrame(
             self,
             fg_color="transparent",
@@ -162,22 +172,6 @@ class App(customtkinter.CTk):
         )
         self.scrollable_slider_frame.grid(row=0, column=1, padx=0, pady=0, sticky="ns")
         self.scrollable_slider_frame.pack(fill="both", expand=True)
-
-        # self.slider_1 = customtkinter.CTkSlider(
-        #     self.slider_progressbar_frame,
-        #     from_=0,
-        #     to=1,
-        #     number_of_steps=100,
-        #     command=self.slider_callback,
-        # )
-        # self.slider_1.grid(row=3, column=0, padx=(0, 0), pady=(10, 10), sticky="ew")
-        # # Create the label to display the slider value
-        # self.slider_value_label = customtkinter.CTkLabel(
-        #     self.slider_progressbar_frame, text="0"
-        # )
-        # self.slider_value_label.grid(
-        #     row=3, column=1, padx=(0, 0), pady=(0, 0), sticky="ew"
-        # )
 
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")

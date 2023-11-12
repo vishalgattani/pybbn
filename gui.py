@@ -15,8 +15,8 @@ from assurance_case import (
     sample_mission_bbn,
 )
 from bbn import BBN
+from ctksliders import ScrollableSliderFrame
 from ctktable import *
-from custom_sliders import ScrollableSliderFrame
 from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
 from logger import logger
 

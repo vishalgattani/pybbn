@@ -40,6 +40,7 @@ class BBN:
         self.assurance_case_yaml_name = f"{self.assurance_case_name}.yaml"
         self.assurance_case_svg_name = f"{self.assurance_case_name}.svg"
         self.assurance_case_yaml = None
+        self.assurance_case_dictionary = {}
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -292,9 +293,9 @@ class BBN:
     def bbn2yaml(self):
         yaml_dict = {}
         for node_id, node in self.nodes.items():
-            logger.debug(f"{node_id}:{node}:{node.name}")
-            logger.debug(f"{node_id}:Child of {node.child}")
-            logger.debug(f"{node_id}:Parent to {node.parent}")
+            # logger.debug(f"{node_id}:{node}:{node.name}")
+            # logger.debug(f"{node_id}:Child of {node.child}")
+            # logger.debug(f"{node_id}:Parent to {node.parent}")
             supported_by_list = [f"G{id}" for id in node.child]
             yaml_dict[f"G{node_id}"] = {
                 "text": node.name,
@@ -306,6 +307,8 @@ class BBN:
         # Print or save the YAML output
         with open(f"{self.assurance_case_yaml_name}", "w") as file:
             yaml.dump(yaml_dict, file, default_flow_style=False)
+
+        self.assurance_case_dictionary = yaml_dict
 
         command = f"./gsn2x-macOS {self.assurance_case_yaml_name}"
 

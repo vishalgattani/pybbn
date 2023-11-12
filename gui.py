@@ -10,6 +10,8 @@ from screeninfo import get_monitors
 
 from bbn import BBN
 from ctktable import *
+from custom_sliders import ScrollableSliderFrame
+from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
 from logger import logger
 
 customtkinter.set_appearance_mode(
@@ -23,6 +25,25 @@ customtkinter.set_default_color_theme(
 class App(customtkinter.CTk):
     def __init__(self, bbn: BBN):
         super().__init__()
+
+        self.n_experiments = bbn.n_experiments
+        self.n_sliders = 0
+        self.n_probability_sliders = 0
+        self.n_threshold_sliders = 0
+        self.probability_nodes = []
+        self.threshold_nodes = []
+        for id, node in bbn.nodes.items():
+            logger.debug(f"{id}:{type(node).__name__}")
+            if type(node).__name__ != GoalNode.__name__:
+                self.n_sliders += 1
+                if type(node).__name__ != SuccessNode.__name__:
+                    self.n_threshold_sliders += 1
+                    self.threshold_nodes.append(node)
+            if type(node).__name__ == SuccessNode.__name__:
+                self.n_probability_sliders += 1
+                self.probability_nodes.append(node)
+        logger.debug(f"p: {self.n_probability_sliders}")
+        logger.debug(f"t: {self.n_threshold_sliders}")
 
         self.bbn_dataframe = bbn.get_bbn_dataframe()
         self.bbn_dataframe = self.bbn_dataframe.rename_axis(index="Requirement")
@@ -94,22 +115,6 @@ class App(customtkinter.CTk):
         )
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 
-        # create main entry and button
-        # self.entry = customtkinter.CTkEntry(self, placeholder_text="CTkEntry")
-        # self.entry.grid(
-        #     row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew"
-        # )
-
-        # self.main_button_1 = customtkinter.CTkButton(
-        #     master=self,
-        #     fg_color="transparent",
-        #     border_width=2,
-        #     text_color=("gray10", "#DCE4EE"),
-        # )
-        # self.main_button_1.grid(
-        #     row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew"
-        # )
-
         # create textbox
         self.textbox = customtkinter.CTkLabel(
             self,
@@ -119,39 +124,6 @@ class App(customtkinter.CTk):
             height=self.image.height,
         )
         self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
-
-        # create tabview
-        # self.tabview = customtkinter.CTkTabview(self, width=250)
-        # self.tabview.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
-        # self.tabview.add("CTkTabview")
-        # self.tabview.add("Tab 2")
-        # self.tabview.add("Tab 3")
-        # self.tabview.tab("CTkTabview").grid_columnconfigure(
-        #     0, weight=1
-        # )  # configure grid of individual tabs
-        # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
-
-        # self.optionmenu_1 = customtkinter.CTkOptionMenu(
-        #     self.tabview.tab("CTkTabview"),
-        #     dynamic_resizing=False,
-        #     values=["Value 1", "Value 2", "Value Long Long Long"],
-        # )
-        # self.optionmenu_1.grid(row=0, column=0, padx=20, pady=(20, 10))
-        # self.combobox_1 = customtkinter.CTkComboBox(
-        #     self.tabview.tab("CTkTabview"),
-        #     values=["Value 1", "Value 2", "Value Long....."],
-        # )
-        # self.combobox_1.grid(row=1, column=0, padx=20, pady=(10, 10))
-        # self.string_input_button = customtkinter.CTkButton(
-        #     self.tabview.tab("CTkTabview"),
-        #     text="Open CTkInputDialog",
-        #     command=self.open_input_dialog_event,
-        # )
-        # self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
-        # self.label_tab_2 = customtkinter.CTkLabel(
-        #     self.tabview.tab("Tab 2"), text="CTkLabel on Tab 2"
-        # )
-        # self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
 
         bbn_table_values = self.bbn_dataframe.reset_index().values.tolist()
         # bbn_table_values = self.table_values
@@ -169,92 +141,49 @@ class App(customtkinter.CTk):
         table.grid(row=0, column=2, columnspan=1, padx=5, pady=5, sticky="")
 
         # create slider and progressbar frame
-        self.slider_progressbar_frame = customtkinter.CTkScrollableFrame(
-            self, fg_color="transparent"
+        self.slider_progressbar_frame = customtkinter.CTkFrame(
+            self,
+            fg_color="transparent",
         )
         self.slider_progressbar_frame.grid(
             row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew"
         )
-        self.slider_progressbar_frame.grid_columnconfigure(1, weight=1)
-        self.slider_progressbar_frame.grid_rowconfigure(4, weight=1)
-        self.seg_button_1 = customtkinter.CTkSegmentedButton(
-            self.slider_progressbar_frame
+        self.slider_progressbar_frame.grid_columnconfigure(1, weight=1000)
+        self.slider_progressbar_frame.grid_rowconfigure(self.n_sliders, weight=1)
+
+        probability_sliders = []
+        probability_sliders_labels = []
+
+        self.scrollable_slider_frame = ScrollableSliderFrame(
+            master=self.slider_progressbar_frame,
+            width=250,
+            height=self.winfo_reqheight(),
+            probability_item_list=self.probability_nodes,
+            threshold_item_list=self.threshold_nodes,
+            n_experiments=self.n_experiments,
+            bbn=bbn,
+            command=self.handle_slider_value,
         )
-        # self.seg_button_1.grid(
-        #     row=0, column=0, padx=(20, 10), pady=(10, 10), sticky="ew"
+        self.scrollable_slider_frame.grid(row=0, column=1, padx=0, pady=0, sticky="ns")
+
+        # self.slider_1 = customtkinter.CTkSlider(
+        #     self.slider_progressbar_frame,
+        #     from_=0,
+        #     to=1,
+        #     number_of_steps=100,
+        #     command=self.slider_callback,
         # )
-        # self.progressbar_1 = customtkinter.CTkProgressBar(self.slider_progressbar_frame)
-        # self.progressbar_1.grid(
-        #     row=1, column=0, padx=(20, 10), pady=(10, 10), sticky="ew"
+        # self.slider_1.grid(row=3, column=0, padx=(0, 0), pady=(10, 10), sticky="ew")
+        # # Create the label to display the slider value
+        # self.slider_value_label = customtkinter.CTkLabel(
+        #     self.slider_progressbar_frame, text="0"
         # )
-        # self.progressbar_2 = customtkinter.CTkProgressBar(self.slider_progressbar_frame)
-        # self.progressbar_2.grid(
-        #     row=2, column=0, padx=(20, 10), pady=(10, 10), sticky="ew"
+        # self.slider_value_label.grid(
+        #     row=3, column=1, padx=(0, 0), pady=(0, 0), sticky="ew"
         # )
 
-        # Create the label to display the slider value
-        self.slider_value_label = customtkinter.CTkLabel(
-            self.slider_progressbar_frame, text="0"
-        )
-        self.slider_value_label.grid(
-            row=3, column=1, padx=(0, 0), pady=(0, 0), sticky="ew"
-        )
-
-        self.slider_1 = customtkinter.CTkSlider(
-            self.slider_progressbar_frame,
-            from_=0,
-            to=1,
-            number_of_steps=100,
-            command=self.slider1,
-        )
-        self.slider_1.grid(row=3, column=0, padx=(0, 0), pady=(10, 10), sticky="ew")
-        # self.slider_2 = customtkinter.CTkSlider(
-        #     self.slider_progressbar_frame, orientation="vertical"
-        # )
-        # self.slider_2.grid(
-        #     row=0, column=1, rowspan=5, padx=(10, 10), pady=(10, 10), sticky="ns"
-        # )
-        # self.progressbar_3 = customtkinter.CTkProgressBar(
-        #     self.slider_progressbar_frame, orientation="vertical"
-        # )
-        # self.progressbar_3.grid(
-        #     row=0, column=2, rowspan=5, padx=(10, 20), pady=(10, 10), sticky="ns"
-        # )
-
-        # create scrollable frame
-        # self.scrollable_frame = customtkinter.CTkScrollableFrame(
-        #     self, label_text="CTkScrollableFrame"
-        # )
-        # self.scrollable_frame.grid(
-        #     row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew"
-        # )
-        # self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        # self.scrollable_frame_switches = []
-        # for i in range(100):
-        #     switch = customtkinter.CTkSwitch(
-        #         master=self.scrollable_frame, text=f"CTkSwitch {i}"
-        #     )
-        #     switch.grid(row=i, column=0, padx=10, pady=(0, 20))
-        #     self.scrollable_frame_switches.append(switch)
-
-        # set default values
-        # self.sidebar_button_3.configure(state="disabled", text="Disabled CTkButton")
-        # self.checkbox_3.configure(state="disabled")
-        # self.checkbox_1.select()
-        # self.scrollable_frame_switches[0].select()
-        # self.scrollable_frame_switches[4].select()
-        # self.radio_button_3.configure(state="disabled")
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
-        # self.optionmenu_1.set("CTkOptionmenu")
-        # self.combobox_1.set("CTkComboBox")
-        # self.slider_1.configure(command=self.progressbar_2.set)
-        # self.slider_2.configure(command=self.progressbar_3.set)
-        # self.progressbar_1.configure(mode="indeterminnate")
-        # self.progressbar_1.start()
-        # self.textbox.insert("0.0", "CTkTextbox\n\n" + "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\n" * 20)
-        # self.seg_button_1.configure(values=["CTkSegmentedButton", "Value 2", "Value 3"])
-        # self.seg_button_1.set("Value 2")
 
         # create a bar plot
         self.bar_plot_frame = customtkinter.CTkFrame(self)
@@ -313,10 +242,10 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
 
-    def slider1(self, value):
-        print("slider1", value)
+    def handle_slider_value(self, name, value):
         value = "{:.2f}".format(round(value, 2))
-        self.slider_value_label.configure(text=f"{value}")
+        logger.debug(f"{name}:{value}")
+        # self.slider_value_label.configure(text=f"{value}")
 
     def save_data(self):
         print("save_data click")

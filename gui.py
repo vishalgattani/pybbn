@@ -146,18 +146,14 @@ class App(customtkinter.CTk):
             fg_color="transparent",
         )
         self.slider_progressbar_frame.grid(
-            row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew"
+            row=0, column=2, padx=(20, 20), pady=(20, 0), sticky="nsew"
         )
-        self.slider_progressbar_frame.grid_columnconfigure(1, weight=1000)
+        self.slider_progressbar_frame.grid_columnconfigure(1, weight=1)
         self.slider_progressbar_frame.grid_rowconfigure(self.n_sliders, weight=1)
-
-        probability_sliders = []
-        probability_sliders_labels = []
 
         self.scrollable_slider_frame = ScrollableSliderFrame(
             master=self.slider_progressbar_frame,
-            width=250,
-            height=self.winfo_reqheight(),
+            # height=self.winfo_reqheight(),
             probability_item_list=self.probability_nodes,
             threshold_item_list=self.threshold_nodes,
             n_experiments=self.n_experiments,
@@ -165,6 +161,7 @@ class App(customtkinter.CTk):
             command=self.handle_slider_value,
         )
         self.scrollable_slider_frame.grid(row=0, column=1, padx=0, pady=0, sticky="ns")
+        self.scrollable_slider_frame.pack(fill="both", expand=True)
 
         # self.slider_1 = customtkinter.CTkSlider(
         #     self.slider_progressbar_frame,
@@ -242,10 +239,9 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
 
-    def handle_slider_value(self, name, value):
+    def handle_slider_value(self, value, slider):
         value = "{:.2f}".format(round(value, 2))
-        logger.debug(f"{name}:{value}")
-        # self.slider_value_label.configure(text=f"{value}")
+        logger.debug(f"{slider.name}:{value}")
 
     def save_data(self):
         print("save_data click")

@@ -36,10 +36,12 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
             to=1,
             number_of_steps=100,
         )
+        slider.set(float("{:.2f}".format(round(item.probability_of_success, 2))))
         for key, value in self.bbn.assurance_case_dictionary.items():
             if value.get("text") == item.name:
+                val = "{:.2f}".format(round(slider.get(), 2))
                 value_label = customtkinter.CTkLabel(
-                    self, text=f"{slider.get()}", compound="left", padx=5, anchor="w"
+                    self, text=f"{val}", compound="left", padx=5, anchor="w"
                 )
                 value_label.grid(
                     row=len(self.slider_value_label_list),
@@ -81,8 +83,10 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
             to=self.n_experiments,
             number_of_steps=self.n_experiments,
         )
+        slider.set(item.threshold)
         for key, value in self.bbn.assurance_case_dictionary.items():
             if value.get("text") == item.name:
+                val = slider.get()
                 value_label = customtkinter.CTkLabel(
                     self, text=f"{slider.get()}", compound="left", padx=5, anchor="w"
                 )

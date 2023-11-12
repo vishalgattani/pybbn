@@ -27,15 +27,17 @@ class App(customtkinter.CTk):
         self.configure_gui(bbn)
 
     def update_gui_with_new_bbn(self, new_bbn: BBN):
+        logger.warning(f"Updating BBN...")
         # Call this method when you want to update the GUI with a new BBN instance
-        self.scrollable_slider_frame.destroy()
-        self.table_frame.destroy()
-        self.sidebar_frame.destroy()
-        self.slider_progressbar_frame.destroy()
-        self.bar_plot_frame.destroy()
+        # self.scrollable_slider_frame.destroy()
+        # self.table_frame.destroy()
+        # self.sidebar_frame.destroy()
+        # self.slider_progressbar_frame.destroy()
+        # self.bar_plot_frame.destroy()
         self.configure_gui(new_bbn)
 
     def configure_gui(self, bbn: BBN):
+        self.bbn = bbn
         self.n_experiments = bbn.n_experiments
         self.n_sliders = 0
         self.n_probability_sliders = 0
@@ -206,7 +208,8 @@ class App(customtkinter.CTk):
     def plot_subplot(self, ax, df_subset, title):
         # Bar width and x positions
         bar_width = 0.35
-        x_pos = np.arange(len(["True", "False"]))
+        x_pos = np.arange(len(["True"]))
+        logger.debug(f"???{df_subset}")
         true_values, false_values = df_subset[0], df_subset[1]
         ax.bar(x_pos, true_values, bar_width, color="g", label="True")
         ax.bar(x_pos + bar_width, false_values, bar_width, color="r", label="False")
@@ -236,6 +239,7 @@ class App(customtkinter.CTk):
     def handle_slider_value(self, value, slider):
         value = "{:.2f}".format(round(value, 2))
         logger.debug(f"{slider.name}:{value}")
+        self.update_gui_with_new_bbn(self.bbn)
 
     def save_data(self):
         print("save_data click")

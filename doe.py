@@ -27,6 +27,7 @@ class SuccessNode:
         self.name = name
         self.child = []
         self.parent = []
+        self.probability_of_success = probability_of_success
 
         self.set_cpt(
             n_experiments=n_experiments, probability_of_success=probability_of_success

@@ -192,20 +192,10 @@ class App(customtkinter.CTk):
         )
 
         fig, axes = plt.subplots(1, 4, figsize=(15, 4), sharey=True)
-        # fig,ax = plt.subplots()
-
-        # Extract data for each subplot
-        missions = self.bbn_dataframe.loc["Meeting requirements"].tolist()
-        collisions = self.bbn_dataframe.loc["Robot Collision under Threshold"].tolist()
-        waypoints = self.bbn_dataframe.loc["Robot Nav Terrain under Threshold"].tolist()
-        poses = self.bbn_dataframe.loc["Robot Pose under Threshold"].tolist()
-
-        # # Plot each subplot
-        self.plot_subplot(axes[0], missions, "P(Meeting requirements)")
-        self.plot_subplot(axes[1], waypoints, "P(Correct waypoints)")
-        self.plot_subplot(axes[2], collisions, "P(No collision)")
-        self.plot_subplot(axes[3], poses, "P(Pose<=Region)")
-
+        for i, idx in enumerate(self.bbn_dataframe.index.values.tolist()):
+            self.plot_subplot(
+                axes[i], self.bbn_dataframe.loc[idx].tolist(), f"P({idx})"
+            )
         # Embed the matplotlib plot in the Tkinter GUI
         canvas = FigureCanvasTkAgg(fig, master=self.bar_plot_frame)
         canvas.draw()
@@ -216,7 +206,6 @@ class App(customtkinter.CTk):
         # Bar width and x positions
         bar_width = 0.35
         x_pos = np.arange(len(["True"]))
-        logger.debug(f"???{df_subset}")
         true_values, false_values = df_subset[0], df_subset[1]
         ax.bar(x_pos, true_values, bar_width, color="g", label="True")
         ax.bar(x_pos + bar_width, false_values, bar_width, color="r", label="False")
@@ -245,12 +234,8 @@ class App(customtkinter.CTk):
 
     def handle_slider_value(self, value, slider, sliderlist):
         value = "{:.2f}".format(round(value, 2))
-        logger.debug(f"{slider.name}:{value}")
         vals = []
         for s in sliderlist:
-            logger.warning(
-                f"{s.name[-1]}:{self.bbn.assurance_case_dictionary[s.name]['text']}:{s.get()}"
-            )
             vals.append(s.get())
         new_bbn = sample_mission_bbn(
             self.n_experiments, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]

@@ -98,7 +98,9 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
                 )
                 self.slider_label_list.append(label)
         slider.configure(
-            command=lambda value, slider=slider: self.combined_callback(value, slider)
+            command=lambda value, slider=slider: self.combined_callback(
+                value, slider, self.slider_list
+            )
         )
         slider.grid(row=len(self.slider_list), column=0, padx=(0, 0), pady=(10, 10))
         self.slider_list.append(slider)

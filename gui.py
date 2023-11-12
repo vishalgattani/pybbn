@@ -7,6 +7,13 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image
 from screeninfo import get_monitors
 
+from assurance_case import (
+    n_experiments,
+    p_correct_navigation,
+    p_correct_pose,
+    p_no_collision,
+    sample_mission_bbn,
+)
 from bbn import BBN
 from ctktable import *
 from custom_sliders import ScrollableSliderFrame
@@ -44,7 +51,7 @@ class App(customtkinter.CTk):
         self.n_threshold_sliders = 0
         self.probability_nodes = []
         self.threshold_nodes = []
-        for id, node in bbn.nodes.items():
+        for id, node in self.bbn.nodes.items():
             if type(node).__name__ != GoalNode.__name__:
                 self.n_sliders += 1
                 if type(node).__name__ != SuccessNode.__name__:
@@ -195,8 +202,8 @@ class App(customtkinter.CTk):
 
         # # Plot each subplot
         self.plot_subplot(axes[0], missions, "P(Meeting requirements)")
-        self.plot_subplot(axes[1], collisions, "P(Correct waypoints)")
-        self.plot_subplot(axes[2], waypoints, "P(No collision)")
+        self.plot_subplot(axes[1], waypoints, "P(Correct waypoints)")
+        self.plot_subplot(axes[2], collisions, "P(No collision)")
         self.plot_subplot(axes[3], poses, "P(Pose<=Region)")
 
         # Embed the matplotlib plot in the Tkinter GUI
@@ -236,10 +243,19 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
 
-    def handle_slider_value(self, value, slider):
+    def handle_slider_value(self, value, slider, sliderlist):
         value = "{:.2f}".format(round(value, 2))
         logger.debug(f"{slider.name}:{value}")
-        self.update_gui_with_new_bbn(self.bbn)
+        vals = []
+        for s in sliderlist:
+            logger.warning(
+                f"{s.name[-1]}:{self.bbn.assurance_case_dictionary[s.name]['text']}:{s.get()}"
+            )
+            vals.append(s.get())
+        new_bbn = sample_mission_bbn(
+            self.n_experiments, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]
+        )
+        self.update_gui_with_new_bbn(new_bbn=new_bbn)
 
     def save_data(self):
         print("save_data click")

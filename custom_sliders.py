@@ -58,22 +58,13 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
                 label.grid(
                     row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w"
                 )
-
                 self.slider_label_list.append(label)
-
         slider.configure(
-            command=lambda value, slider=slider: self.combined_callback(value, slider)
+            command=lambda value, slider=slider: self.combined_callback(
+                value, slider, self.slider_list
+            )
         )
-        # if self.command is None:
-        #     slider.configure(
-        #         command=lambda value, slider=slider: self.slider_callback( slider, value)
-        #     )
-        # else:
-        #     slider.configure(
-        #         command=lambda value, slider=slider: self.command(slider, value)
-        #     )
         slider.grid(row=len(self.slider_list), column=0, padx=(0, 0), pady=(10, 10))
-
         self.slider_list.append(slider)
 
     def add_threshold_item(self, item):
@@ -106,20 +97,10 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
                     row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w"
                 )
                 self.slider_label_list.append(label)
-
         slider.configure(
             command=lambda value, slider=slider: self.combined_callback(value, slider)
         )
-        # if self.command is None:
-        #     slider.configure(
-        #         command=lambda value, slider=slider: self.slider_callback(slider, value)
-        #     )
-        # else:
-        #     slider.configure(
-        #         command=lambda value, slider=slider: self.command(slider, value)
-        #     )
         slider.grid(row=len(self.slider_list), column=0, padx=(0, 0), pady=(10, 10))
-
         self.slider_list.append(slider)
 
     def remove_item(self, item):
@@ -140,7 +121,7 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
         self.slider_value_labels[name].configure(text=f"{value}")
         # handle plot/bbn evidence updates and new dataframes
 
-    def combined_callback(self, value, slider):
+    def combined_callback(self, value, slider, slider_list):
         self.slider_callback(value, slider)
         self.slider_value_callback(value, slider)
-        self.command(value, slider)
+        self.command(value, slider, slider_list)

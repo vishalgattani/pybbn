@@ -15,3 +15,5 @@ pre-commit==3.4.0
 customtkinter==5.2.1
 darkdetect==0.8.0
 graphviz==0.20.1
+cairosvg==2.7.1
+screeninfo==0.8.1

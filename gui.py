@@ -3,6 +3,7 @@ import pathlib
 import customtkinter
 import matplotlib.pyplot as plt
 import numpy as np
+from customtkinter import CTkButton, CTkFrame
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image
 from screeninfo import get_monitors
@@ -226,11 +227,12 @@ class App(customtkinter.CTk):
         print("CTkInputDialog:", dialog.get_input())
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_appearance_mode(new_appearance_mode)
+        ...
+        # customtkinter.set_appearance_mode(new_appearance_mode)
 
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        customtkinter.set_widget_scaling(new_scaling_float)
+        # customtkinter.set_widget_scaling(new_scaling_float)
 
     def handle_slider_value(self, value, slider, sliderlist):
         value = "{:.2f}".format(round(value, 2))
@@ -240,7 +242,7 @@ class App(customtkinter.CTk):
         new_bbn = sample_mission_bbn(
             self.n_experiments, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]
         )
-        self.update_gui_with_new_bbn(new_bbn=new_bbn)
+        # self.update_gui_with_new_bbn(new_bbn=new_bbn)
 
     def save_data(self):
         print("save_data click")

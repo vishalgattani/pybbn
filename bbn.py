@@ -11,6 +11,8 @@ import pathlib
 import pandas as pd
 
 pd.set_option("display.max_rows", None)
+import platform
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
@@ -41,6 +43,18 @@ class BBN:
         self.assurance_case_svg_name = f"{self.assurance_case_name}.svg"
         self.assurance_case_yaml = None
         self.assurance_case_dictionary = {}
+        self.gsn2x_executable = self.get_platform_executable()
+
+    def get_platform_executable(self):
+        system = platform.system()
+        if system == "Darwin":
+            return f"gsn2x-macOS"
+        elif system == "Linux":
+            return f"gsn2x"
+        else:
+            logger.error(
+                f"Unknown operating system: {system}. Supported platforms: (macOS, Ubuntu)"
+            )
 
     def evidence(self, nod, cat, val):
         """Sets the evidence of a particular node by its name, state and probability value
@@ -173,9 +187,9 @@ class BBN:
             self.bbn.add_node(node)
             id = node_type.id
             self.nodes[id] = node_type
-            logger.debug(
-                f"Added {node_type.name}({node_type.id}) of type '{type(node_type).__name__}'"
-            )
+            # logger.debug(
+            #     f"Added {node_type.name}({node_type.id}) of type '{type(node_type).__name__}'"
+            # )
             if type(node_type).__name__ == GoalNode.__name__:
                 self.goal_node[id] = node_type
             return node
@@ -188,9 +202,9 @@ class BBN:
             self.nodes[from_node.variable.id].parent.append(to_node.variable.id)
             self.nodes[to_node.variable.id].child.append(from_node.variable.id)
             self.bbn.add_edge(Edge(from_node, to_node, EdgeType.DIRECTED))
-            logger.debug(
-                f"Added edge from {from_node.variable.name}({from_node.variable.id}) --> {to_node.variable.name}({to_node.variable.id})"
-            )
+            # logger.debug(
+            #     f"Added edge from {from_node.variable.name}({from_node.variable.id}) --> {to_node.variable.name}({to_node.variable.id})"
+            # )
         except Exception as e:
             logger.error(f"{e}")
 
@@ -310,15 +324,15 @@ class BBN:
 
         self.assurance_case_dictionary = yaml_dict
 
-        command = f"./gsn2x-macOS {self.assurance_case_yaml_name}"
+        command = f"./{self.gsn2x_executable} {self.assurance_case_yaml_name}"
 
         # Run the command to generate assurance case yaml
         output = subprocess.run(command, shell=True)
+        self.get_assurance_case_png()
         assert (
             pathlib.Path.cwd() / f"{self.assurance_case_name}.png"
         ).is_file(), f"Assurance case couldn't be generated"
         logger.debug(f"Generated assurance case SVG: {output}")
-        self.get_assurance_case_png()
 
         # flowchart = self.create_flowchart(yaml_dict)
         # # Save the flowchart to a file (in DOT format)

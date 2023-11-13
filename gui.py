@@ -242,7 +242,7 @@ class App(customtkinter.CTk):
         new_bbn = sample_mission_bbn(
             self.n_experiments, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]
         )
-        # self.update_gui_with_new_bbn(new_bbn=new_bbn)
+        self.update_gui_with_new_bbn(new_bbn=new_bbn)
 
     def save_data(self):
         print("save_data click")

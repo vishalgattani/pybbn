@@ -310,8 +310,18 @@ class BBN:
             # logger.debug(f"{node_id}:{node}:{node.name}")
             # logger.debug(f"{node_id}:Child of {node.child}")
             # logger.debug(f"{node_id}:Parent to {node.parent}")
-            supported_by_list = [f"G{id}" for id in node.child]
-            yaml_dict[f"G{node_id}"] = {
+            current_node_yaml_id = ""
+            if type(node).__name__ == SuccessNode.__name__:
+                current_node_yaml_id = f"Sn{node_id}"
+            else:
+                current_node_yaml_id = f"G{node_id}"
+            supported_by_list = []
+            for id in node.child:
+                if type(self.nodes[id]).__name__ == SuccessNode.__name__:
+                    supported_by_list.append(f"Sn{id}")
+                else:
+                    supported_by_list.append(f"G{id}")
+            yaml_dict[f"{current_node_yaml_id}"] = {
                 "text": node.name,
                 "supportedBy": supported_by_list,
             }

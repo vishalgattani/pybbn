@@ -1,11 +1,13 @@
 import pathlib
+import textwrap
+from tkinter import Canvas, PhotoImage, Scrollbar
 
 import customtkinter
 import matplotlib.pyplot as plt
 import numpy as np
 from customtkinter import CTkButton, CTkFrame
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import Image
+from PIL import Image, ImageTk
 from screeninfo import get_monitors
 
 from assurance_case import (
@@ -32,6 +34,7 @@ customtkinter.set_default_color_theme(
 class App(customtkinter.CTk):
     def __init__(self, bbn: BBN):
         super().__init__()
+        self.plot_font_size = 5
         self.configure_gui(bbn)
 
     def update_gui_with_new_bbn(self, new_bbn: BBN):
@@ -85,8 +88,18 @@ class App(customtkinter.CTk):
         self.image_path = bbn.get_assurance_case_png()
         self.image = Image.open(bbn.get_assurance_case_png())
         self.large_test_image = customtkinter.CTkImage(
-            self.image, size=(self.image.width, self.image.height)
+            self.image, size=(self.image.width // 1.2, self.image.height // 1.2)
         )
+
+        # create textbox
+        self.textbox = customtkinter.CTkLabel(
+            self,
+            image=self.large_test_image,
+            text="",
+            width=self.image.width,
+            height=self.image.height,
+        )
+        self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
 
         # create sidebarframe with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
@@ -132,16 +145,6 @@ class App(customtkinter.CTk):
             command=self.change_scaling_event,
         )
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
-
-        # create textbox
-        self.textbox = customtkinter.CTkLabel(
-            self,
-            image=self.large_test_image,
-            text="",
-            width=self.image.width,
-            height=self.image.height,
-        )
-        self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
 
         bbn_table_values = self.bbn_dataframe.reset_index().values.tolist()
         # bbn_table_values = self.table_values
@@ -192,7 +195,7 @@ class App(customtkinter.CTk):
             row=1, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew"
         )
 
-        fig, axes = plt.subplots(1, 4, figsize=(15, 4), sharey=True)
+        fig, axes = plt.subplots(1, 4, figsize=(5, 2), sharey=True)
         for i, idx in enumerate(self.bbn_dataframe.index.values.tolist()):
             self.plot_subplot(
                 axes[i], self.bbn_dataframe.loc[idx].tolist(), f"P({idx})"
@@ -204,6 +207,7 @@ class App(customtkinter.CTk):
 
     # Plotting
     def plot_subplot(self, ax, df_subset, title):
+        title = "\n".join(textwrap.wrap(title, width=15))
         # Bar width and x positions
         bar_width = 0.35
         x_pos = np.arange(len(["True"]))
@@ -211,9 +215,13 @@ class App(customtkinter.CTk):
         ax.bar(x_pos, true_values, bar_width, color="g", label="True")
         ax.bar(x_pos + bar_width, false_values, bar_width, color="r", label="False")
         ax.set_ylim(0, 1)
-        ax.set_title(title)
+        ax.tick_params(axis="y", labelsize=self.plot_font_size)
+        ax.set_title(title, fontsize=self.plot_font_size)
         ax.set_xticks([0, bar_width])
-        ax.set_xticklabels(["True", "False"])
+        ax.set_xticklabels(["True", "False"], fontsize=self.plot_font_size)
+        # ax.set_xlabel(fontsize=self.plot_font_size)
+        # ax.set_ylabel("",fontsize=self.plot_font_size)
+        plt.tight_layout()
 
     def show(self, cell):
         logger.debug(

@@ -169,14 +169,16 @@ Pre-commit hooks: `black` (formatter), `isort` (import sorter), `flake8` (linter
 
 ---
 
-## Roadmap
+## Future Improvements
 
-- [ ] Save/load BBN state to JSON
-- [ ] Support dynamic mission definition via config file (no code changes)
-- [ ] Export belief history over slider sessions
-- [ ] Add more node types (e.g. AND/OR logic gates)
-- [ ] Web-based GUI (Streamlit or Dash) as alternative to tkinter
-- [ ] CI/CD with automated tests
+Numbered by priority — pick item 1 to start next:
+
+1. **CI/CD pipeline** — add GitHub Actions workflow (lint + test on every push)
+2. **Save/load BBN state** — export/import current slider state to JSON so sessions are resumable
+3. **Config-driven missions** — define missions via YAML config instead of editing `assurance_case.py`
+4. **Export belief history** — record how posteriors change as sliders are adjusted; export to CSV
+5. **More node types** — AND/OR logic gates, weighted evidence nodes
+6. **Web GUI** — Streamlit or Dash alternative to tkinter for browser-based access
 
 ---
 

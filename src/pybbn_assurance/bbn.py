@@ -8,7 +8,6 @@ import platform
 import subprocess
 import warnings
 
-import cairosvg
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -312,9 +311,8 @@ class BBN:
         assert svg_path.is_file(), f"Assurance case SVG not found at {svg_path}"
         logger.debug(f"Generated assurance case SVG: {svg_path}")
 
-    def get_assurance_case_png(self) -> str:
-        """Convert the assurance-case SVG to PNG and return the PNG path."""
+    def get_assurance_case_svg(self) -> str:
+        """Read and return the assurance-case SVG as a string."""
         svg_path = pathlib.Path(self.assurance_case_svg_name).resolve()
-        png_path = svg_path.parent / f"{self.assurance_case_name}.png"
-        cairosvg.svg2png(url=str(svg_path), write_to=str(png_path))
-        return str(png_path)
+        assert svg_path.is_file(), f"Assurance case SVG not found at {svg_path}"
+        return svg_path.read_text()

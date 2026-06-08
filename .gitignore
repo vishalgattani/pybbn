@@ -10,3 +10,35 @@ __pycache__
 evidences.md
 test/
 *.egg-info/
+
+# Coverage
+.coverage
+htmlcov/
+*.coverage
+coverage.xml
+
+# Build / dist
+dist/
+build/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python bytecode
+*.pyc
+**/__pycache__/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db

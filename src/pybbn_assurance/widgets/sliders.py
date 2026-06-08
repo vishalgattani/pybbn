@@ -4,7 +4,6 @@
 import customtkinter
 
 from pybbn_assurance.bbn import BBN
-from pybbn_assurance.logger import logger
 
 
 class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
@@ -58,9 +57,7 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
                 label = customtkinter.CTkLabel(
                     self, text=f"{key}", compound="left", padx=5, anchor="w"
                 )
-                label.grid(
-                    row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w"
-                )
+                label.grid(row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w")
                 self.slider_label_list.append(label)
         slider.configure(
             command=lambda value, slider=slider: self.combined_callback(
@@ -96,9 +93,7 @@ class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):
                 label = customtkinter.CTkLabel(
                     self, text=f"{key}", compound="left", padx=5, anchor="w"
                 )
-                label.grid(
-                    row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w"
-                )
+                label.grid(row=len(self.slider_label_list), column=2, pady=(0, 10), sticky="w")
                 self.slider_label_list.append(label)
         slider.configure(
             command=lambda value, slider=slider: self.combined_callback(

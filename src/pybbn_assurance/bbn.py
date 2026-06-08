@@ -16,7 +16,10 @@ import pandas as pd
 import yaml
 from graphviz import Digraph
 
-from pybbn_assurance.doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
+from pybbn_assurance.doe import (
+    GoalNode,
+    SuccessNode,
+)
 from pybbn_assurance.logger import logger
 
 from pybbn.graph.dag import Bbn
@@ -25,7 +28,6 @@ from pybbn.graph.jointree import EvidenceBuilder
 from pybbn.graph.node import BbnNode
 from pybbn.graph.variable import Variable
 from pybbn.pptc.inferencecontroller import InferenceController
-from pybbn.sampling.sampling import LogicSampler
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 np.seterr(invalid="ignore")
@@ -269,44 +271,49 @@ class BBN:
 
         return graph
 
-    def bbn2yaml(self) -> Optional[str]:
+    def to_yaml_dict(self) -> Dict[str, Any]:
+        """Build the assurance-case GSN dictionary (pure logic, no side effects)."""
         yaml_dict: Dict[str, Any] = {}
         for node_id, node in self.nodes.items():
-            current_node_yaml_id = ""
-            if type(node).__name__ == SuccessNode.__name__:
-                current_node_yaml_id = f"Sn{node_id}"
-            else:
-                current_node_yaml_id = f"G{node_id}"
+            current_node_yaml_id = (
+                f"Sn{node_id}" if type(node).__name__ == SuccessNode.__name__ else f"G{node_id}"
+            )
             supported_by_list = []
             for id in node.child:
                 if type(self.nodes[id]).__name__ == SuccessNode.__name__:
                     supported_by_list.append(f"Sn{id}")
                 else:
                     supported_by_list.append(f"G{id}")
-            yaml_dict[f"{current_node_yaml_id}"] = {
+            yaml_dict[current_node_yaml_id] = {
                 "text": node.name,
                 "supportedBy": supported_by_list,
             }
+        return yaml_dict
 
+    def bbn2yaml(self) -> Optional[str]:
+        """Write the YAML file, render the GSN diagram, and return the YAML string."""
+        yaml_dict = self.to_yaml_dict()
         yaml_output = yaml.dump(yaml_dict, default_flow_style=True)
-        with open(f"{self.assurance_case_yaml_name}", "w") as file:
-            yaml.dump(yaml_dict, file, default_flow_style=False)
-
         self.assurance_case_dictionary = yaml_dict
-
-        command = f"./{self.gsn2x_executable} {self.assurance_case_yaml_name}"
-
-        # Run the command to generate assurance case yaml
-        output = subprocess.run(command, shell=True)
-        self.get_assurance_case_png()
-        assert (
-            pathlib.Path.cwd() / f"{self.assurance_case_name}.png"
-        ).is_file(), f"Assurance case couldn't be generated"
-        logger.debug(f"Generated assurance case SVG: {output}")
-
+        self.write_yaml_and_render(yaml_dict)
         return yaml_output
 
+    def write_yaml_and_render(self, yaml_dict: Dict[str, Any]) -> None:
+        """Write the GSN YAML to disk and render the assurance case diagram."""
+        yaml_path = pathlib.Path(self.assurance_case_yaml_name).resolve()
+        svg_path = pathlib.Path(self.assurance_case_svg_name).resolve()
+
+        with open(yaml_path, "w") as f:
+            yaml.dump(yaml_dict, f, default_flow_style=False)
+
+        command = f"./{self.gsn2x_executable} {self.assurance_case_yaml_name}"
+        subprocess.run(command, shell=True)
+
+        assert svg_path.is_file(), f"Assurance case SVG not found at {svg_path}"
+        logger.debug(f"Generated assurance case SVG: {svg_path}")
+
     def get_assurance_case_png(self) -> str:
+        """Convert the assurance-case SVG to PNG and return the PNG path."""
         svg_path = pathlib.Path(self.assurance_case_svg_name).resolve()
         png_path = svg_path.parent / f"{self.assurance_case_name}.png"
         cairosvg.svg2png(url=str(svg_path), write_to=str(png_path))

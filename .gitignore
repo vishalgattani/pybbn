@@ -9,3 +9,4 @@ __pycache__
 **/*.svg
 evidences.md
 test/
+*.egg-info/

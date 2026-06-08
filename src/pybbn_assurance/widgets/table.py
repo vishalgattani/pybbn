@@ -6,8 +6,6 @@
 # Author: Akash Bora
 
 import copy
-import tkinter as tk
-from tkinter import ttk
 
 import customtkinter
 
@@ -39,7 +37,7 @@ class CTkTable(customtkinter.CTkFrame):
         hover=False,
         justify="center",
         wraplength: int = 1000,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(master, fg_color="transparent")
 
@@ -215,7 +213,7 @@ class CTkTable(customtkinter.CTkFrame):
                         command=(lambda e=self.data[i, j]: self.command(e))
                         if self.command
                         else None,
-                        **args
+                        **args,
                     )
                     self.frame[i, j].grid(
                         column=j, row=i, padx=self.padx, pady=self.pady, sticky="nsew"

@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68.0"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pybbn-assurance"
@@ -38,6 +38,9 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+
+[tool.ruff.lint]
+ignore = ["F841"]  # pre-existing unused local variables (deferred cleanup)
 
 [tool.black]
 line-length = 100

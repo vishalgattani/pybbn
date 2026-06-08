@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 import numpy as np
 import pandas as pd
 
-from pybbn_assurance.helper import get_binomial_prob, get_cdf_binomial_prob
+from pybbn_assurance.helper import get_binomial_prob
 
 
 class DOE:
@@ -38,14 +38,10 @@ class SuccessNode:
         self.parent: List[int] = []
         self.probability_of_success = probability_of_success
 
-        self.set_cpt(
-            n_experiments=n_experiments, probability_of_success=probability_of_success
-        )
+        self.set_cpt(n_experiments=n_experiments, probability_of_success=probability_of_success)
 
     def set_cpt(self, n_experiments: int, probability_of_success: float) -> None:
-        self.probability_list = get_binomial_prob(
-            n=n_experiments, p=probability_of_success
-        )
+        self.probability_list = get_binomial_prob(n=n_experiments, p=probability_of_success)
         self.cpt = pd.DataFrame({"success": self.probability_list})
         idxlist = self.cpt.index.tolist()
         self.cpt = self.cpt.set_index([pd.Index(["n" + str(idx) for idx in idxlist])])
@@ -100,9 +96,7 @@ class MaxThresholdNode(ThresholdNode):
         n_experiments: int,
         threshold: int,
     ) -> None:
-        super().__init__(
-            id=id, name=name, n_experiments=n_experiments, threshold=threshold
-        )
+        super().__init__(id=id, name=name, n_experiments=n_experiments, threshold=threshold)
         self.set_cpt()
         self.child = []
         self.parent = []
@@ -133,9 +127,7 @@ class MinThresholdNode(ThresholdNode):
         n_experiments: int,
         threshold: int,
     ) -> None:
-        super().__init__(
-            id=id, name=name, n_experiments=n_experiments, threshold=threshold
-        )
+        super().__init__(id=id, name=name, n_experiments=n_experiments, threshold=threshold)
         self.set_cpt()
         self.child = []
         self.parent = []
@@ -167,14 +159,7 @@ class GoalNode(ThresholdNode):
         self.initialize()
 
     def initialize(self) -> None:
-        keys, values = [], []
-        for i in range(2**self.n_children):
-            keys.append(str(i))
-            if i == 0:
-                values.append([1, 0])
-            else:
-                values.append([0, 1])
-        cpt_list = dict(zip(keys, values))
+        cpt_list = {str(i): [1, 0] if i == 0 else [0, 1] for i in range(2**self.n_children)}
         self.cpt = pd.DataFrame(cpt_list)
         self.cpt["States"] = ["True", "False"]
         self.states = self.cpt["States"]

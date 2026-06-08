@@ -3,37 +3,29 @@
 
 """Thin entry point for the PyBBN Assurance GUI."""
 
-import pathlib
 import textwrap
-from tkinter import Canvas, PhotoImage, Scrollbar
 
 import customtkinter
 import matplotlib.pyplot as plt
 import numpy as np
-from customtkinter import CTkButton, CTkFrame
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import Image, ImageTk
+from PIL import Image
 from screeninfo import get_monitors
 
 from pybbn_assurance.bbn import BBN
 from pybbn_assurance.cases.mission import (
-    n_experiments,
-    p_correct_navigation,
-    p_correct_pose,
-    p_no_collision,
     sample_mission_bbn,
 )
-from pybbn_assurance.doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
+from pybbn_assurance.doe import (
+    GoalNode,
+    SuccessNode,
+)
 from pybbn_assurance.logger import logger
 from pybbn_assurance.widgets.sliders import ScrollableSliderFrame
 from pybbn_assurance.widgets.table import CTkTable
 
-customtkinter.set_appearance_mode(
-    "Light"
-)  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme(
-    "blue"
-)  # Themes: "blue" (standard), "green", "dark-blue"
+customtkinter.set_appearance_mode("Light")  # Modes: "System" (standard), "Dark", "Light"
+customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 
 class App(customtkinter.CTk):
@@ -74,7 +66,7 @@ class App(customtkinter.CTk):
         self.bbn_dataframe = self.bbn_dataframe.rename_axis(index="Requirement")
         self.bbn_assurance_case_dictionary = bbn.assurance_case_dictionary
         # configure window
-        self.title(f"PyBBN Assurance Case")
+        self.title("PyBBN Assurance Case")
         # Get the screen width and height
         primary_monitor = get_monitors()[0]
         screen_width, screen_height = primary_monitor.width, primary_monitor.height
@@ -129,35 +121,14 @@ class App(customtkinter.CTk):
         self.sidebar_button_3 = customtkinter.CTkButton(
             self.sidebar_frame, command=self.show_beliefs, text="Show Beliefs"
         )
+
         self.sidebar_button_3.grid(row=3, column=0, padx=20, pady=10)
-        self.appearance_mode_label = customtkinter.CTkLabel(
-            self.sidebar_frame, text="Appearance Mode:", anchor="w"
-        )
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(
-            self.sidebar_frame,
-            values=["Light", "Dark", "System"],
-            command=self.change_appearance_mode_event,
-        )
-        self.appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
-        self.scaling_label = customtkinter.CTkLabel(
-            self.sidebar_frame, text="UI Scaling:", anchor="w"
-        )
-        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
-        self.scaling_optionemenu = customtkinter.CTkOptionMenu(
-            self.sidebar_frame,
-            values=["80%", "90%", "100%", "110%", "120%"],
-            command=self.change_scaling_event,
-        )
-        self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 
         bbn_table_values = self.bbn_dataframe.reset_index().values.tolist()
         # bbn_table_values = self.table_values
         self.table_frame = customtkinter.CTkFrame(self, fg_color="transparent")
         # self.table_frame.pack(expand=True, fill="both")
-        self.table_frame.grid(
-            row=1, column=2, padx=(20, 20), pady=(20, 0), sticky="nsew"
-        )
+        self.table_frame.grid(row=1, column=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
         self.table = CTkTable(
             master=self.table_frame,
             row=len(bbn_table_values),
@@ -191,20 +162,13 @@ class App(customtkinter.CTk):
         self.scrollable_slider_frame.grid(row=0, column=1, padx=0, pady=0, sticky="ns")
         self.scrollable_slider_frame.pack(fill="both", expand=True)
 
-        self.appearance_mode_optionemenu.set("Dark")
-        self.scaling_optionemenu.set("100%")
-
         # create a bar plot
         self.bar_plot_frame = customtkinter.CTkFrame(self)
-        self.bar_plot_frame.grid(
-            row=1, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew"
-        )
+        self.bar_plot_frame.grid(row=1, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
 
         fig, axes = plt.subplots(1, 4, figsize=(5, 2), sharey=True)
         for i, idx in enumerate(self.bbn_dataframe.index.values.tolist()):
-            self.plot_subplot(
-                axes[i], self.bbn_dataframe.loc[idx].tolist(), f"P({idx})"
-            )
+            self.plot_subplot(axes[i], self.bbn_dataframe.loc[idx].tolist(), f"P({idx})")
         # Embed the matplotlib plot in the Tkinter GUI
         canvas = FigureCanvasTkAgg(fig, master=self.bar_plot_frame)
         canvas.draw()
@@ -229,23 +193,11 @@ class App(customtkinter.CTk):
         plt.tight_layout()
 
     def show(self, cell):
-        logger.debug(
-            f"Table value clicked: {cell['value']} ({cell['row']}x{cell['column']})"
-        )
+        logger.debug(f"Table value clicked: {cell['value']} ({cell['row']}x{cell['column']})")
 
     def open_input_dialog_event(self):
-        dialog = customtkinter.CTkInputDialog(
-            text="Type in a number:", title="CTkInputDialog"
-        )
+        dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="CTkInputDialog")
         print("CTkInputDialog:", dialog.get_input())
-
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        ...
-        # customtkinter.set_appearance_mode(new_appearance_mode)
-
-    def change_scaling_event(self, new_scaling: str):
-        new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        # customtkinter.set_widget_scaling(new_scaling_float)
 
     def handle_slider_value(self, value, slider, sliderlist):
         value = "{:.2f}".format(round(value, 2))
@@ -258,13 +210,16 @@ class App(customtkinter.CTk):
         self.update_gui_with_new_bbn(new_bbn=new_bbn)
 
     def save_data(self):
-        print("save_data click")
+        # TODO: implement data persistence for slider/probability settings
+        raise NotImplementedError("save_data is not yet implemented")
 
     def show_assurance_case(self):
-        print("show_assurance_case click")
+        # TODO: implement assurance case visualization
+        raise NotImplementedError("show_assurance_case is not yet implemented")
 
     def show_beliefs(self):
-        print("show_beliefs click")
+        # TODO: implement belief network visualization
+        raise NotImplementedError("show_beliefs is not yet implemented")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
-from bbn import BBN
-from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
-from logger import logger
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
+from pybbn_assurance.bbn import BBN
+from pybbn_assurance.doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
 
 n_experiments = 5
 p_correct_navigation = 0.9
@@ -9,22 +11,20 @@ p_correct_pose = 0.9
 
 
 def sample_mission_bbn(
-    n_experiments,
-    p_correct_navigation,
-    p_no_collision,
-    p_correct_pose,
-    nav_threshold=0,
-    collision_threshold=0,
-    pose_threshold=0,
-):
+    n_experiments: int,
+    p_correct_navigation: float,
+    p_no_collision: float,
+    p_correct_pose: float,
+    nav_threshold: int = 0,
+    collision_threshold: int = 0,
+    pose_threshold: int = 0,
+) -> BBN:
     bbn = BBN(n_experiments=n_experiments)
-    mission_success = bbn.create_bbn_node(
-        GoalNode(0, "Meeting requirements", n_children=3)
-    )
+    mission_success = bbn.create_bbn_node(GoalNode(0, "Meeting requirements", n_children=3))
     mission_all_waypoints = bbn.create_bbn_node(
         node_type=MinThresholdNode(
             id=1,
-            name=f"Robot Nav Terrain under Threshold",
+            name="Robot Nav Terrain under Threshold",
             n_experiments=bbn.n_experiments,
             threshold=nav_threshold,
         )
@@ -40,7 +40,7 @@ def sample_mission_bbn(
     mission_no_collision = bbn.create_bbn_node(
         MaxThresholdNode(
             3,
-            f"Robot Collision under Threshold",
+            "Robot Collision under Threshold",
             n_experiments=bbn.n_experiments,
             threshold=collision_threshold,
         )
@@ -56,7 +56,7 @@ def sample_mission_bbn(
     mission_pose_in_threshold = bbn.create_bbn_node(
         MinThresholdNode(
             5,
-            f"Robot Pose under Threshold",
+            "Robot Pose under Threshold",
             n_experiments=bbn.n_experiments,
             threshold=pose_threshold,
         )

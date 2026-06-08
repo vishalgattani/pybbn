@@ -1,4 +1,5 @@
-import logging
+# Author: Vishal Gattani
+# Created: 2024-06-07
 
 import logging
 
@@ -12,9 +13,7 @@ class CustomFormatter(logging.Formatter):
     white = "\x1b[37;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = (
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    )
+    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
     format = "[%(levelname)s] - %(message)s (%(filename)s:%(lineno)d)"
 
     FORMATS = {
@@ -25,7 +24,7 @@ class CustomFormatter(logging.Formatter):
         logging.CRITICAL: bold_red + format + reset,
     }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
@@ -33,10 +32,11 @@ class CustomFormatter(logging.Formatter):
 
 # Create a filter to exclude logs from external libraries
 class ExcludeSpecificLogsFilter(logging.Filter):
-    def __init__(self, excluded_strings):
+    def __init__(self, excluded_strings: list[str]):
+        super().__init__()
         self.excluded_strings = excluded_strings
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         for string in self.excluded_strings:
             try:
                 if record.msg and str(record.msg).startswith(string):

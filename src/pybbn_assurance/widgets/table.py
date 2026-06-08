@@ -1,3 +1,6 @@
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
 # CTkTable Widget by Akascape
 # License: MIT
 # Author: Akash Bora
@@ -100,24 +103,6 @@ class CTkTable(customtkinter.CTkFrame):
                 self.fg_color2 = customtkinter.ThemeManager.theme["CTk"]["fg_color"]
 
         self.frame = {}
-
-        # tk.Canvas.__init__(self, master, **kwargs)
-        # self.table_frame = tk.Frame(self)  # Frame to hold the table
-        # self.table_frame.grid(row=0, column=2, sticky="nsew")
-
-        # self.scrollbar_y = tk.Scrollbar(self, orient='vertical', command=self.yview)
-        # self.scrollbar_y.grid(row=0, column=1, sticky="ns")
-        # self.configure(yscrollcommand=self.scrollbar_y.set)
-
-        # self.scrollbar_x = tk.Scrollbar(self, orient='horizontal', command=self.xview)
-        # self.scrollbar_x.grid(row=1, column=0, sticky="ew")
-        # self.configure(xscrollcommand=self.scrollbar_x.set)
-
-        # self.grid_rowconfigure(0, weight=1)
-        # self.grid_columnconfigure(0, weight=1)
-
-        # self.rows = row if row else len(values)
-        # self.columns = column if column else len(values[0])
 
         self.draw_table(**kwargs)
 

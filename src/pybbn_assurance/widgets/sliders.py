@@ -1,7 +1,10 @@
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
 import customtkinter
 
-from bbn import BBN
-from logger import logger
+from pybbn_assurance.bbn import BBN
+from pybbn_assurance.logger import logger
 
 
 class ScrollableSliderFrame(customtkinter.CTkScrollableFrame):

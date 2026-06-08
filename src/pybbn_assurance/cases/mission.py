@@ -1,6 +1,9 @@
-from bbn import BBN
-from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
-from logger import logger
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
+from pybbn_assurance.bbn import BBN
+from pybbn_assurance.doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode
+from pybbn_assurance.logger import logger
 
 n_experiments = 5
 p_correct_navigation = 0.9
@@ -9,14 +12,14 @@ p_correct_pose = 0.9
 
 
 def sample_mission_bbn(
-    n_experiments,
-    p_correct_navigation,
-    p_no_collision,
-    p_correct_pose,
-    nav_threshold=0,
-    collision_threshold=0,
-    pose_threshold=0,
-):
+    n_experiments: int,
+    p_correct_navigation: float,
+    p_no_collision: float,
+    p_correct_pose: float,
+    nav_threshold: int = 0,
+    collision_threshold: int = 0,
+    pose_threshold: int = 0,
+) -> BBN:
     bbn = BBN(n_experiments=n_experiments)
     mission_success = bbn.create_bbn_node(
         GoalNode(0, "Meeting requirements", n_children=3)

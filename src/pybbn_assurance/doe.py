@@ -1,13 +1,16 @@
-import pathlib
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
+from typing import Any, List, Optional
 
 import numpy as np
 import pandas as pd
 
-from helper import get_binomial_prob, get_cdf_binomial_prob
+from pybbn_assurance.helper import get_binomial_prob, get_cdf_binomial_prob
 
 
 class DOE:
-    def __init__(self, n_experiments, experiment) -> None:
+    def __init__(self, n_experiments: int, experiment: "Experiment") -> None:
         self.n_experiments = n_experiments
         self.thresholds = list(range(self.n_experiments))
         self.experiment = experiment
@@ -19,21 +22,27 @@ class Experiment:
 
 
 class SuccessNode:
-    def __init__(self, id, name, n_experiments, probability_of_success) -> None:
-        self.probability_list = None
-        self.cpt = None
-        self.states = None
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        n_experiments: int,
+        probability_of_success: float,
+    ) -> None:
+        self.probability_list: Optional[List[float]] = None
+        self.cpt: Optional[pd.DataFrame] = None
+        self.states: Optional[pd.Index] = None
         self.id = id
         self.name = name
-        self.child = []
-        self.parent = []
+        self.child: List[int] = []
+        self.parent: List[int] = []
         self.probability_of_success = probability_of_success
 
         self.set_cpt(
             n_experiments=n_experiments, probability_of_success=probability_of_success
         )
 
-    def set_cpt(self, n_experiments, probability_of_success):
+    def set_cpt(self, n_experiments: int, probability_of_success: float) -> None:
         self.probability_list = get_binomial_prob(
             n=n_experiments, p=probability_of_success
         )
@@ -44,45 +53,53 @@ class SuccessNode:
         self.states = self.cpt["States"]
         self.cpt.set_index("States", inplace=True)
 
-    def get_cpt_list(self):
+    def get_cpt_list(self) -> List[Any]:
         return np.ravel(self.cpt.values.tolist()).tolist()
 
-    def get_cpt_states(self):
+    def get_cpt_states(self) -> Optional[pd.Index]:
         return self.states
 
 
 class ThresholdNode:
-    def __init__(self, id=None, name=None, n_experiments=None, threshold=None) -> None:
-        self.cpt = None
+    def __init__(
+        self,
+        id: Optional[int] = None,
+        name: Optional[str] = None,
+        n_experiments: Optional[int] = None,
+        threshold: Optional[int] = None,
+    ) -> None:
+        self.cpt: Optional[pd.DataFrame] = None
         self.n_experiments = n_experiments
         self.threshold = threshold
-        self.states = None
+        self.states: Optional[pd.Index] = None
         self.id = id
         self.name = name
-        self.child = []
-        self.parent = []
+        self.child: List[int] = []
+        self.parent: List[int] = []
 
-    def get_n_experiments(self):
+    def get_n_experiments(self) -> Optional[int]:
         return self.n_experiments
 
-    def get_threshold(self):
+    def get_threshold(self) -> Optional[int]:
         return self.threshold
 
-    def get_cpt_list(self):
+    def get_cpt_list(self) -> List[Any]:
         return np.ndarray.flatten(self.cpt.transpose().values).tolist()
 
-    def get_cpt_states(self):
+    def get_cpt_states(self) -> Optional[pd.Index]:
         return self.states
 
 
 class MaxThresholdNode(ThresholdNode):
-    """Maximum threshold applied to a node before it returns to false states
+    """Maximum threshold applied to a node before it returns to false states."""
 
-    Args:
-        ThresholdNode (_type_): _description_
-    """
-
-    def __init__(self, id, name, n_experiments, threshold) -> None:
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        n_experiments: int,
+        threshold: int,
+    ) -> None:
         super().__init__(
             id=id, name=name, n_experiments=n_experiments, threshold=threshold
         )
@@ -90,7 +107,7 @@ class MaxThresholdNode(ThresholdNode):
         self.child = []
         self.parent = []
 
-    def set_cpt(self):
+    def set_cpt(self) -> None:
         keys, values = [], []
         for i in range(self.n_experiments + 1):
             keys.append(str(i))
@@ -107,13 +124,15 @@ class MaxThresholdNode(ThresholdNode):
 
 
 class MinThresholdNode(ThresholdNode):
-    """Minimum threshold applied to a node after it returns to True states
+    """Minimum threshold applied to a node after it returns to True states."""
 
-    Args:
-        ThresholdNode (_type_): _description_
-    """
-
-    def __init__(self, id, name, n_experiments, threshold) -> None:
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        n_experiments: int,
+        threshold: int,
+    ) -> None:
         super().__init__(
             id=id, name=name, n_experiments=n_experiments, threshold=threshold
         )
@@ -121,7 +140,7 @@ class MinThresholdNode(ThresholdNode):
         self.child = []
         self.parent = []
 
-    def set_cpt(self):
+    def set_cpt(self) -> None:
         keys, values = [], []
         for i in range(self.n_experiments + 1):
             keys.append(str(i))
@@ -137,17 +156,17 @@ class MinThresholdNode(ThresholdNode):
 
 
 class GoalNode(ThresholdNode):
-    def __init__(self, id, name, n_children) -> None:
+    def __init__(self, id: int, name: str, n_children: int) -> None:
         self.id = id
         self.name = name
-        self.cpt = None
+        self.cpt: Optional[pd.DataFrame] = None
         self.n_children = n_children
-        self.states = None
-        self.child = []
-        self.parent = []
+        self.states: Optional[pd.Index] = None
+        self.child: List[int] = []
+        self.parent: List[int] = []
         self.initialize()
 
-    def initialize(self):
+    def initialize(self) -> None:
         keys, values = [], []
         for i in range(2**self.n_children):
             keys.append(str(i))

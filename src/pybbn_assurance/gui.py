@@ -1,3 +1,8 @@
+# Author: Vishal Gattani
+# Created: 2024-06-07
+
+"""Thin entry point for the PyBBN Assurance GUI."""
+
 import pathlib
 import textwrap
 from tkinter import Canvas, PhotoImage, Scrollbar
@@ -10,18 +15,18 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 from screeninfo import get_monitors
 
-from assurance_case import (
+from pybbn_assurance.bbn import BBN
+from pybbn_assurance.cases.mission import (
     n_experiments,
     p_correct_navigation,
     p_correct_pose,
     p_no_collision,
     sample_mission_bbn,
 )
-from bbn import BBN
-from ctksliders import ScrollableSliderFrame
-from ctktable import *
-from doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
-from logger import logger
+from pybbn_assurance.doe import GoalNode, MaxThresholdNode, MinThresholdNode, SuccessNode, ThresholdNode
+from pybbn_assurance.logger import logger
+from pybbn_assurance.widgets.sliders import ScrollableSliderFrame
+from pybbn_assurance.widgets.table import CTkTable
 
 customtkinter.set_appearance_mode(
     "Light"
@@ -38,7 +43,7 @@ class App(customtkinter.CTk):
         self.configure_gui(bbn)
 
     def update_gui_with_new_bbn(self, new_bbn: BBN):
-        logger.warning(f"Updating BBN...")
+        logger.warning("Updating BBN...")
         # Call this method when you want to update the GUI with a new BBN instance
         # self.scrollable_slider_frame.destroy()
         # self.table_frame.destroy()
